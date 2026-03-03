@@ -1,0 +1,332 @@
+---
+title: Getting Started
+description: Create your first Jan extension in minutes
+---
+
+This guide walks you through creating a basic Jan extension that listens to message events and provides custom responses.
+
+## Prerequisites
+
+- Node.js 18.0.0 or higher
+- Yarn package manager
+- Basic TypeScript knowledge
+- Jan application installed
+
+## Step 1: Set Up Your Project
+
+### Clone the Extension Template
+
+```bash
+git clone https://github.com/janhq/extension-template my-extension
+cd my-extension
+```
+
+### Install Dependencies
+
+```bash
+yarn install
+```
+
+## Step 2: Update package.json
+
+Edit `package.json` with your extension details:
+
+```json package.json
+{
+  "name": "@myorg/my-extension",
+  "productName": "My Extension",
+  "version": "1.0.0",
+  "description": "My first Jan extension",
+  "main": "dist/index.js",
+  "author": "Your Name <you@example.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "rolldown -c rolldown.config.mjs",
+    "build:publish": "yarn build && npm pack"
+  },
+  "dependencies": {
+    "@janhq/core": "latest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+
+## Step 3: Create Your Extension
+
+Edit `src/index.ts`:
+
+```typescript src/index.ts
+import {
+  BaseExtension,
+  ExtensionTypeEnum,
+  events,
+  MessageEvent,
+  MessageRequest,
+  ThreadMessage,
+  ChatCompletionRole,
+  ContentType,
+  MessageStatus
+} from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  constructor() {
+    super(
+      '', // URL will be set by Jan
+      'my-extension', // Extension name
+      'My Extension', // Product name
+      true, // Active by default
+      'My first Jan extension', // Description
+      '1.0.0' // Version
+    )
+  }
+
+  async onLoad(): Promise<void> {
+    console.log('My extension loaded!')
+
+    // Listen for message sent events
+    events.on(MessageEvent.OnMessageSent, this.handleMessageSent)
+  }
+
+  onUnload(): void {
+    console.log('My extension unloaded')
+
+    // Clean up event listeners
+    events.off(MessageEvent.OnMessageSent, this.handleMessageSent)
+  }
+
+  private handleMessageSent = async (data: MessageRequest) => {
+    console.log('Message sent:', data)
+
+    // Example: Log when user mentions a specific keyword
+    const lastMessage = data.messages?.[data.messages.length - 1]
+    if (lastMessage?.content?.toString().includes('hello')) {
+      console.log('User said hello!')
+    }
+  }
+}
+```
+
+## Step 4: Build Your Extension
+
+Compile your extension:
+
+```bash
+yarn build
+```
+
+This generates a `dist/` folder with your compiled extension.
+
+## Step 5: Package Your Extension
+
+Create a `.tgz` package:
+
+```bash
+yarn build:publish
+```
+
+This creates a file like `myorg-my-extension-1.0.0.tgz`.
+
+## Step 6: Install in Jan
+
+1. Open Jan application
+2. Go to **Settings** > **Extensions**
+3. Click **Manual Installation**
+4. Select your `.tgz` file
+5. Restart Jan if prompted
+
+## Step 7: Verify Installation
+
+Check the console logs (Help > Toggle Developer Tools) to see:
+
+```
+My extension loaded!
+```
+
+Send a message containing "hello" and you should see:
+
+```
+User said hello!
+```
+
+## Example: Advanced Extension with Settings
+
+Let's add settings to customize behavior:
+
+```typescript src/index.ts
+import {
+  BaseExtension,
+  events,
+  MessageEvent,
+  MessageRequest,
+  SettingComponentProps
+} from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  private triggerWord: string = 'hello'
+
+  async onLoad(): Promise<void> {
+    // Register settings
+    const settings: SettingComponentProps[] = [
+      {
+        key: 'trigger_word',
+        title: 'Trigger Word',
+        description: 'Word to trigger the extension',
+        controllerType: 'input',
+        controllerProps: {
+          placeholder: 'Enter trigger word',
+          value: 'hello',
+          type: 'text'
+        }
+      },
+      {
+        key: 'enabled',
+        title: 'Enable Extension',
+        description: 'Turn extension on or off',
+        controllerType: 'checkbox',
+        controllerProps: {
+          value: true
+        }
+      }
+    ]
+
+    await this.registerSettings(settings)
+
+    // Load saved settings
+    this.triggerWord = await this.getSetting('trigger_word', 'hello')
+    const enabled = await this.getSetting('enabled', true)
+
+    if (enabled) {
+      events.on(MessageEvent.OnMessageSent, this.handleMessageSent)
+    }
+  }
+
+  onUnload(): void {
+    events.off(MessageEvent.OnMessageSent, this.handleMessageSent)
+  }
+
+  // Handle setting updates
+  onSettingUpdate<T>(key: string, value: T): void {
+    if (key === 'trigger_word') {
+      this.triggerWord = value as string
+      console.log('Trigger word updated to:', this.triggerWord)
+    } else if (key === 'enabled') {
+      if (value) {
+        events.on(MessageEvent.OnMessageSent, this.handleMessageSent)
+      } else {
+        events.off(MessageEvent.OnMessageSent, this.handleMessageSent)
+      }
+    }
+  }
+
+  private handleMessageSent = async (data: MessageRequest) => {
+    const lastMessage = data.messages?.[data.messages.length - 1]
+    if (lastMessage?.content?.toString().includes(this.triggerWord)) {
+      console.log(`Trigger word "${this.triggerWord}" detected!`)
+    }
+  }
+}
+```
+
+## Example Extension Types
+
+### Inference Extension
+
+```typescript
+import { InferenceExtension, MessageRequest, ThreadMessage } from '@janhq/core'
+
+export default class MyInferenceExtension extends InferenceExtension {
+  async inference(data: MessageRequest): Promise<ThreadMessage> {
+    // Implement your inference logic
+    return {
+      id: 'msg_' + Date.now(),
+      object: 'thread.message',
+      thread_id: data.threadId,
+      role: ChatCompletionRole.Assistant,
+      content: [{
+        type: ContentType.Text,
+        text: {
+          value: 'Custom response',
+          annotations: []
+        }
+      }],
+      status: MessageStatus.Ready,
+      created_at: Date.now(),
+      completed_at: Date.now()
+    }
+  }
+}
+```
+
+### Conversational Extension
+
+```typescript
+import { ConversationalExtension, Thread, ThreadMessage } from '@janhq/core'
+
+export default class MyConversationalExtension extends ConversationalExtension {
+  async listThreads(): Promise<Thread[]> {
+    // Return list of threads
+    return []
+  }
+
+  async createThread(thread: Partial<Thread>): Promise<Thread> {
+    // Create and return new thread
+    return thread as Thread
+  }
+
+  async modifyThread(thread: Thread): Promise<void> {
+    // Update thread
+  }
+
+  async deleteThread(threadId: string): Promise<void> {
+    // Delete thread
+  }
+
+  async createMessage(message: Partial<ThreadMessage>): Promise<ThreadMessage> {
+    // Create and return new message
+    return message as ThreadMessage
+  }
+
+  async listMessages(threadId: string): Promise<ThreadMessage[]> {
+    // Return messages for thread
+    return []
+  }
+
+  // ... implement other methods
+}
+```
+
+## Debugging Tips
+
+<AccordionGroup>
+  <Accordion title="Extension not loading">
+    - Check the console for errors (Help > Toggle Developer Tools)
+    - Verify `package.json` has correct `main` field pointing to `dist/index.js`
+    - Ensure extension is built: `yarn build`
+    - Try reinstalling the extension
+  </Accordion>
+
+  <Accordion title="Settings not appearing">
+    - Verify `registerSettings()` is called in `onLoad()`
+    - Check setting configuration matches `SettingComponentProps` interface
+    - Restart Jan after installing extension
+  </Accordion>
+
+  <Accordion title="Events not firing">
+    - Ensure you're using the correct event name from `@janhq/core`
+    - Check that `events.on()` is called after Jan finishes loading
+    - Verify event handler function is bound correctly (use arrow functions)
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Core API Reference" icon="code" href="/extensions/core-api">
+    Explore all available APIs
+  </Card>
+  <Card title="Building Extensions" icon="hammer" href="/extensions/building-extensions">
+    Learn packaging and distribution
+  </Card>
+</CardGroup>

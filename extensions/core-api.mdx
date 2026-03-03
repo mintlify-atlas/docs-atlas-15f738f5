@@ -1,0 +1,602 @@
+---
+title: '@janhq/core API Reference'
+description: Complete API reference for the @janhq/core package
+---
+
+The `@janhq/core` package provides all the APIs, types, and interfaces needed to build Jan extensions.
+
+## Installation
+
+```bash
+yarn add @janhq/core
+```
+
+## Import
+
+```typescript
+import * as core from '@janhq/core'
+```
+
+## Base Classes
+
+### BaseExtension
+
+All extensions extend from `BaseExtension`:
+
+```typescript
+abstract class BaseExtension implements ExtensionType {
+  name: string
+  productName?: string
+  url: string
+  active?: boolean
+  description?: string
+  version?: string
+
+  abstract onLoad(): void
+  abstract onUnload(): void
+
+  type(): ExtensionTypeEnum | undefined
+  compatibility(): Compatibility | undefined
+
+  // Settings management
+  async registerSettings(settings: SettingComponentProps[]): Promise<void>
+  async getSettings(): Promise<SettingComponentProps[]>
+  async getSetting<T>(key: string, defaultValue: T): Promise<T>
+  async updateSettings(componentProps: Partial<SettingComponentProps>[]): Promise<void>
+  onSettingUpdate<T>(key: string, value: T): void
+
+  // Model management
+  async registerModels(models: Model[]): Promise<void>
+
+  // Installation
+  async install(): Promise<void>
+}
+```
+
+#### Key Methods
+
+<ResponseField name="onLoad" type="() => void" required>
+  Called when the extension is loaded. Initialize your extension here.
+</ResponseField>
+
+<ResponseField name="onUnload" type="() => void" required>
+  Called when the extension is unloaded. Clean up resources here.
+</ResponseField>
+
+<ResponseField name="type" type="() => ExtensionTypeEnum | undefined">
+  Returns the extension type. Return `undefined` for generic extensions.
+</ResponseField>
+
+<ResponseField name="registerSettings" type="(settings: SettingComponentProps[]) => Promise<void>">
+  Register settings for your extension that appear in Jan's UI.
+</ResponseField>
+
+<ResponseField name="getSetting" type="<T>(key: string, defaultValue: T) => Promise<T>">
+  Get a setting value by key. Returns `defaultValue` if not found.
+</ResponseField>
+
+<ResponseField name="updateSettings" type="(settings: Partial<SettingComponentProps>[]) => Promise<void>">
+  Update one or more settings programmatically.
+</ResponseField>
+
+<ResponseField name="onSettingUpdate" type="<T>(key: string, value: T) => void">
+  Called when a setting is updated by the user. Override to react to changes.
+</ResponseField>
+
+<ResponseField name="registerModels" type="(models: Model[]) => Promise<void>">
+  Register models that can be used in Jan.
+</ResponseField>
+
+### InferenceExtension
+
+Extends `BaseExtension` for inference implementations:
+
+```typescript
+abstract class InferenceExtension extends BaseExtension implements InferenceInterface {
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Inference
+  }
+
+  abstract inference(data: MessageRequest): Promise<ThreadMessage>
+}
+```
+
+<ResponseField name="inference" type="(data: MessageRequest) => Promise<ThreadMessage>" required>
+  Perform inference on a message request and return the response.
+</ResponseField>
+
+### ConversationalExtension
+
+Extends `BaseExtension` for conversation management:
+
+```typescript
+abstract class ConversationalExtension extends BaseExtension {
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Conversational
+  }
+
+  abstract listThreads(): Promise<Thread[]>
+  abstract createThread(thread: Partial<Thread>): Promise<Thread>
+  abstract modifyThread(thread: Thread): Promise<void>
+  abstract deleteThread(threadId: string): Promise<void>
+  abstract createMessage(message: Partial<ThreadMessage>): Promise<ThreadMessage>
+  abstract modifyMessage(message: ThreadMessage): Promise<ThreadMessage>
+  abstract deleteMessage(threadId: string, messageId: string): Promise<void>
+  abstract listMessages(threadId: string): Promise<ThreadMessage[]>
+  abstract getThreadAssistant(threadId: string): Promise<ThreadAssistantInfo>
+  abstract createThreadAssistant(threadId: string, assistant: ThreadAssistantInfo): Promise<ThreadAssistantInfo>
+  abstract modifyThreadAssistant(threadId: string, assistant: ThreadAssistantInfo): Promise<ThreadAssistantInfo>
+}
+```
+
+### AssistantExtension
+
+Extends `BaseExtension` for assistant management:
+
+```typescript
+abstract class AssistantExtension extends BaseExtension implements AssistantInterface {
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Assistant
+  }
+
+  abstract createAssistant(assistant: Assistant): Promise<void>
+  abstract deleteAssistant(assistant: Assistant): Promise<void>
+  abstract getAssistants(): Promise<Assistant[]>
+}
+```
+
+## Extension Types
+
+```typescript
+enum ExtensionTypeEnum {
+  Assistant = 'assistant',
+  Conversational = 'conversational',
+  Inference = 'inference',
+  Model = 'model',
+  SystemMonitoring = 'systemMonitoring',
+  MCP = 'mcp',
+  HuggingFace = 'huggingFace',
+  Engine = 'engine',
+  Hardware = 'hardware',
+  RAG = 'rag',
+  VectorDB = 'vectorDB'
+}
+```
+
+## Event System
+
+The event system allows extensions to communicate:
+
+```typescript
+const events = {
+  on: (eventName: string, handler: Function) => void,
+  off: (eventName: string, handler: Function) => void,
+  emit: (eventName: string, object: any) => void
+}
+```
+
+### Message Events
+
+```typescript
+enum MessageEvent {
+  OnMessageSent = 'OnMessageSent',
+  OnMessageResponse = 'OnMessageResponse',
+  OnMessageUpdate = 'OnMessageUpdate'
+}
+```
+
+**Example:**
+
+```typescript
+import { events, MessageEvent } from '@janhq/core'
+
+events.on(MessageEvent.OnMessageSent, (data: MessageRequest) => {
+  console.log('User sent:', data)
+})
+
+events.emit(MessageEvent.OnMessageResponse, responseMessage)
+```
+
+### Inference Events
+
+```typescript
+enum InferenceEvent {
+  OnInferenceStopped = 'OnInferenceStopped'
+}
+```
+
+## Core Types
+
+### Model
+
+```typescript
+type Model = {
+  object: string              // "model"
+  version: string             // Model version
+  format: string              // "gguf", "safetensors", etc.
+  sources: ModelArtifact[]    // Download sources
+  id: string                  // Unique identifier
+  model?: string              // Model identifier (modern)
+  name: string                // Human-readable name
+  created: number             // Unix timestamp
+  description: string         // Model description
+  settings: ModelSettingParams
+  parameters: ModelRuntimeParams
+  metadata: ModelMetadata
+  engine: string              // "llamacpp", "openai", etc.
+}
+
+type ModelArtifact = {
+  filename: string
+  url: string
+}
+
+type ModelMetadata = {
+  author: string
+  tags: string[]
+  size: number                // Size in bytes
+  cover?: string              // Cover image URL
+  default_ctx_len?: number
+  default_max_tokens?: number
+}
+
+type ModelSettingParams = {
+  ctx_len?: number
+  ngl?: number
+  embedding?: boolean
+  n_parallel?: number
+  cpu_threads?: number
+  prompt_template?: string
+  system_prompt?: string
+  temperature?: number
+  top_p?: number
+  top_k?: number
+  // ... more parameters
+}
+
+type ModelRuntimeParams = {
+  temperature?: number
+  max_temperature?: number
+  token_limit?: number
+  top_k?: number
+  top_p?: number
+  stream?: boolean
+  max_tokens?: number
+  stop?: string[]
+  frequency_penalty?: number
+  presence_penalty?: number
+  engine?: string
+}
+```
+
+### Thread
+
+```typescript
+type Thread = {
+  id: string                    // Unique identifier (ULID)
+  object: string                // "thread"
+  title: string                 // Thread title
+  assistants: ThreadAssistantInfo[]
+  created: number               // Unix timestamp
+  updated: number               // Unix timestamp
+  metadata?: Record<string, unknown>
+}
+
+type ThreadAssistantInfo = {
+  id: string
+  name: string
+  model: ModelInfo
+  instructions?: string
+  tools?: AssistantTool[]
+}
+```
+
+### ThreadMessage
+
+```typescript
+type ThreadMessage = {
+  id: string                    // Unique identifier (ULID)
+  object: string                // "thread.message"
+  thread_id: string
+  assistant_id?: string
+  attachments?: Array<Attachment> | null
+  role: ChatCompletionRole      // 'user', 'assistant', 'system', 'tool'
+  content: ThreadContent[]
+  status: MessageStatus         // 'ready', 'pending', 'error', 'stopped'
+  created_at: number            // Unix timestamp
+  completed_at: number          // Unix timestamp
+  metadata?: Record<string, unknown>
+  type?: string
+  error_code?: ErrorCode
+  tool_call_id?: string
+}
+
+enum MessageStatus {
+  Ready = 'ready',
+  Pending = 'pending',
+  Error = 'error',
+  Stopped = 'stopped'
+}
+
+enum ChatCompletionRole {
+  System = 'system',
+  Assistant = 'assistant',
+  User = 'user',
+  Tool = 'tool'
+}
+```
+
+### ThreadContent
+
+```typescript
+type ThreadContent = {
+  type: ContentType
+  // For text and reasoning content
+  text?: ContentValue
+  // For image content
+  image_url?: ImageContentValue
+  // For tool call content
+  tool_call_id?: string
+  tool_name?: string
+  input?: unknown
+  output?: unknown
+}
+
+enum ContentType {
+  Text = 'text',
+  Reasoning = 'reasoning',
+  Image = 'image_url',
+  ToolCall = 'tool_call'
+}
+
+type ContentValue = {
+  value: string
+  annotations: string[]
+}
+
+type ImageContentValue = {
+  detail?: string
+  url?: string
+}
+```
+
+### MessageRequest
+
+```typescript
+type MessageRequest = {
+  id?: string
+  threadId: string              // Thread ID (deprecated, use thread)
+  assistantId?: string
+  attachments: Array<Attachment> | null
+  messages?: ChatCompletionMessage[]
+  model?: ModelInfo
+  thread?: Thread
+  tools?: MessageTool[]
+  engine?: string
+  type?: string
+}
+
+type ChatCompletionMessage = {
+  content?: string | ChatCompletionMessageContent[]
+  role: ChatCompletionRole
+  type?: string
+  output?: string
+  tool_call_id?: string
+}
+```
+
+### Assistant
+
+```typescript
+type Assistant = {
+  avatar: string
+  thread_location: string | undefined
+  id: string
+  object: string                // "assistant"
+  created_at: number            // Unix timestamp
+  name: string
+  description?: string
+  model: string
+  instructions?: string
+  tools?: AssistantTool[]
+  file_ids: string[]
+  metadata?: Record<string, unknown>
+}
+
+type AssistantTool = {
+  type: string                  // 'retrieval', 'code_interpreter', etc.
+  enabled: boolean
+  useTimeWeightedRetriever?: boolean
+  settings: any
+}
+```
+
+### Settings
+
+```typescript
+type SettingComponentProps = {
+  key: string
+  title: string
+  description: string
+  controllerType: ControllerType
+  controllerProps: SliderComponentProps | CheckboxComponentProps | InputComponentProps | DropdownComponentProps
+  extensionName?: string
+  requireModelReload?: boolean
+  configType?: 'runtime' | 'setting'
+}
+
+type ControllerType = 'slider' | 'checkbox' | 'input' | 'tag' | 'dropdown'
+
+type InputComponentProps = {
+  placeholder: string
+  value: string | string[]
+  type?: 'password' | 'text' | 'email' | 'number' | 'tel' | 'url'
+  textAlign?: 'left' | 'right'
+  inputActions?: ('unobscure' | 'copy')[]
+}
+
+type SliderComponentProps = {
+  min: number
+  max: number
+  step: number
+  value: number
+}
+
+type CheckboxComponentProps = {
+  value: boolean
+}
+
+type DropdownComponentProps = {
+  value: string
+  type?: string
+  options?: DropdownOption[]
+  recommended?: string
+}
+
+type DropdownOption = {
+  name: string
+  value: string
+}
+```
+
+## Utility Functions
+
+### File System
+
+```typescript
+const fs = {
+  existsSync: (path: string) => Promise<boolean>
+  mkdir: (path: string) => Promise<void>
+  readdirSync: (path: string) => Promise<string[]>
+  readFileSync: (path: string) => Promise<string>
+  writeFileSync: (path: string, data: string) => Promise<void>
+  rm: (path: string) => Promise<void>
+  mv: (from: string, to: string) => Promise<void>
+  fileStat: (path: string) => Promise<FileStat>
+}
+```
+
+### Path Utilities
+
+```typescript
+const getJanDataFolderPath: () => Promise<string>
+const joinPath: (paths: string[]) => Promise<string>
+const baseName: (path: string) => Promise<string>
+const dirName: (path: string) => Promise<string>
+const getUserHomePath: () => Promise<string>
+const getResourcePath: () => Promise<string>
+```
+
+### UI Utilities
+
+```typescript
+const openFileExplorer: (path: string) => Promise<void>
+const openExternalUrl: (url: string) => Promise<void>
+const showToast: (title: string, message: string) => void
+const log: (message: string, fileName?: string) => void
+```
+
+## Example: Complete Extension
+
+```typescript
+import {
+  BaseExtension,
+  ExtensionTypeEnum,
+  events,
+  MessageEvent,
+  MessageRequest,
+  SettingComponentProps,
+  fs,
+  joinPath,
+  getJanDataFolderPath
+} from '@janhq/core'
+
+export default class MyCompleteExtension extends BaseExtension {
+  private dataPath: string = ''
+
+  async onLoad(): Promise<void> {
+    // Initialize data path
+    const janDataPath = await getJanDataFolderPath()
+    this.dataPath = await joinPath([janDataPath, 'my-extension'])
+
+    // Create data directory if it doesn't exist
+    if (!await fs.existsSync(this.dataPath)) {
+      await fs.mkdir(this.dataPath)
+    }
+
+    // Register settings
+    await this.registerSettings([
+      {
+        key: 'enabled',
+        title: 'Enable Extension',
+        description: 'Turn the extension on or off',
+        controllerType: 'checkbox',
+        controllerProps: { value: true }
+      },
+      {
+        key: 'api_key',
+        title: 'API Key',
+        description: 'Your API key',
+        controllerType: 'input',
+        controllerProps: {
+          placeholder: 'Enter API key',
+          value: '',
+          type: 'password',
+          inputActions: ['unobscure', 'copy']
+        }
+      },
+      {
+        key: 'temperature',
+        title: 'Temperature',
+        description: 'Model temperature',
+        controllerType: 'slider',
+        controllerProps: {
+          min: 0,
+          max: 2,
+          step: 0.1,
+          value: 0.7
+        }
+      }
+    ])
+
+    // Listen to events
+    const enabled = await this.getSetting('enabled', true)
+    if (enabled) {
+      events.on(MessageEvent.OnMessageSent, this.handleMessage)
+    }
+  }
+
+  onUnload(): void {
+    events.off(MessageEvent.OnMessageSent, this.handleMessage)
+  }
+
+  onSettingUpdate<T>(key: string, value: T): void {
+    if (key === 'enabled') {
+      if (value) {
+        events.on(MessageEvent.OnMessageSent, this.handleMessage)
+      } else {
+        events.off(MessageEvent.OnMessageSent, this.handleMessage)
+      }
+    }
+  }
+
+  private handleMessage = async (data: MessageRequest) => {
+    const apiKey = await this.getSetting('api_key', '')
+    const temperature = await this.getSetting('temperature', 0.7)
+
+    console.log('Processing message with temp:', temperature)
+    // Your message processing logic here
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Building Extensions" icon="hammer" href="/extensions/building-extensions">
+    Learn how to package and distribute
+  </Card>
+  <Card title="Examples" icon="code" href="https://github.com/janhq/jan/tree/main/extensions">
+    Explore real extension examples
+  </Card>
+</CardGroup>

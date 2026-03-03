@@ -1,0 +1,304 @@
+---
+title: Building Jan from Source
+description: Complete guide to building Jan from source code with detailed prerequisites and build commands.
+---
+
+# Building Jan from Source
+
+For developers who want to build Jan from source or contribute to the project, this guide covers everything you need to get started.
+
+## Prerequisites
+
+Before building Jan, ensure you have the following installed:
+
+- **Node.js** ≥ 20.0.0
+- **Yarn** ≥ 1.22.0
+- **Make** ≥ 3.81
+- **Rust** (for Tauri backend)
+  - Install from [rustup.rs](https://rustup.rs/)
+
+### Platform-Specific Requirements
+
+<Tabs>
+  <Tab title="macOS">
+    For macOS universal builds, you'll need:
+    ```bash
+    rustup target add x86_64-apple-darwin
+    rustup target add aarch64-apple-darwin
+    ```
+    
+    For iOS development:
+    ```bash
+    xcode-select --install
+    rustup target add aarch64-apple-ios
+    rustup target add aarch64-apple-ios-sim
+    rustup target add x86_64-apple-ios
+    ```
+  </Tab>
+  <Tab title="Linux">
+    GPU acceleration is available for NVIDIA, AMD, and Intel Arc graphics cards.
+    
+    Additional packages may be required:
+    ```bash
+    sudo apt-get install build-essential libssl-dev
+    ```
+  </Tab>
+  <Tab title="Windows">
+    Ensure you have:
+    - Visual Studio Build Tools
+    - Windows 10 or later
+    - GPU support for NVIDIA/AMD/Intel Arc
+  </Tab>
+</Tabs>
+
+## Quick Start with Make
+
+The easiest way to build and run Jan:
+
+```bash
+git clone https://github.com/janhq/jan
+cd jan
+make dev
+```
+
+This single command handles everything:
+- Installs all dependencies
+- Builds Tauri plugin APIs
+- Builds core components
+- Builds extensions
+- Downloads required binaries
+- Launches the development environment
+
+## Available Make Targets
+
+Jan uses a Makefile to simplify common development tasks:
+
+### Development
+
+```bash
+make dev                    # Full development setup and launch
+make dev-web-app           # Run web app only (without Tauri)
+make dev-android           # Android development mode
+make dev-ios               # iOS development mode (macOS only)
+```
+
+### Building
+
+```bash
+make build                 # Production build for current platform
+make build-web-app        # Build web application
+make build-cli            # Build Jan CLI (release)
+make build-cli-dev        # Build Jan CLI (debug, faster)
+make build-mlx-server     # Build MLX server (macOS Apple Silicon only)
+```
+
+### Testing & Linting
+
+```bash
+make test                  # Run all tests (TypeScript + Rust)
+make lint                  # Run linters
+```
+
+### Cleanup
+
+```bash
+make clean                 # Delete all build artifacts and dependencies
+```
+
+<Warning>
+  `make clean` removes node_modules, build folders, and caches. You'll need to run `make dev` again after cleaning.
+</Warning>
+
+## Manual Build Commands
+
+If you prefer more control over the build process:
+
+### Install Dependencies
+
+```bash
+yarn install
+```
+
+### Build Core Components
+
+```bash
+yarn build:tauri:plugin:api  # Build Tauri plugin APIs
+yarn build:core              # Build core SDK
+yarn build:extensions        # Build all extensions
+```
+
+### Run Development Server
+
+```bash
+yarn dev                     # Start Tauri app in dev mode
+yarn dev:web                 # Start web app only
+```
+
+### Production Builds
+
+```bash
+yarn build                   # Full production build
+yarn build:web              # Build web application
+yarn build:tauri            # Build Tauri application
+```
+
+## Platform-Specific Builds
+
+### macOS Universal Build
+
+```bash
+yarn build:tauri:darwin
+```
+
+Creates a universal binary that runs on both Intel and Apple Silicon Macs.
+
+### Windows Build
+
+```bash
+yarn build:tauri:win32
+```
+
+### Linux Build
+
+```bash
+yarn build:tauri:linux
+```
+
+Produces both `.deb` and `.AppImage` packages.
+
+## Mobile Development
+
+### Android
+
+```bash
+make dev-android
+```
+
+This will:
+- Install Android Rust targets
+- Initialize Android app (if needed)
+- Set up Android environment
+- Start development server
+
+### iOS
+
+```bash
+make dev-ios
+```
+
+Requirements:
+- macOS only
+- Xcode command line tools
+- iOS simulators installed
+
+## Testing
+
+### Run All Tests
+
+```bash
+yarn test                    # TypeScript tests
+cd src-tauri && cargo test  # Rust tests
+cd autoqa && python main.py # End-to-end tests
+```
+
+### Watch Mode
+
+```bash
+yarn test:watch             # Run tests in watch mode
+yarn test:ui                # Run tests with UI
+yarn test:coverage          # Generate coverage report
+```
+
+## Project Structure
+
+Understanding the codebase structure:
+
+```
+jan/
+├── web-app/              # React frontend
+├── src-tauri/            # Rust backend
+│   ├── src/core/         # Core Tauri commands
+│   └── plugins/          # Tauri plugins
+├── core/                 # TypeScript SDK
+├── extensions/           # JavaScript extensions
+├── docs/                 # Documentation
+├── scripts/              # Build utilities
+├── package.json          # Root workspace config
+└── Makefile              # Build automation
+```
+
+## Troubleshooting
+
+### Build Failures
+
+**Check your versions:**
+```bash
+node --version   # Should be ≥ 20.0.0
+yarn --version   # Should be ≥ 1.22.0
+rustc --version  # Should be installed
+```
+
+**Clean and rebuild:**
+```bash
+make clean
+make dev
+```
+
+### Extensions Not Loading
+
+Verify extensions are properly built:
+```bash
+ls -la pre-install/*.tgz
+```
+
+Rebuild extensions:
+```bash
+yarn build:extensions
+```
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Permission denied on Linux">
+    Make build scripts executable:
+    ```bash
+    chmod +x src-tauri/build-utils/*
+    ```
+  </Accordion>
+  
+  <Accordion title="Rust target not found">
+    Install required targets for your platform:
+    ```bash
+    make install-rust-targets      # macOS
+    make install-android-rust-targets  # Android
+    make install-ios-rust-targets      # iOS
+    ```
+  </Accordion>
+  
+  <Accordion title="MLX server build fails">
+    MLX server only builds on macOS Apple Silicon:
+    - Ensure you're on macOS
+    - Check Swift is installed: `swift --version`
+    - Requires Xcode or Xcode command line tools
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+If you encounter issues:
+
+1. Check the [troubleshooting docs](https://jan.ai/docs/desktop/troubleshooting)
+2. Search [GitHub Issues](https://github.com/janhq/jan/issues)
+3. Ask in [Discord](https://discord.gg/FTk2MvZwJH) `#🆘|jan-help` channel
+4. Review the [Contributing Guide](/resources/contributing)
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Contributing Guide" icon="code-pull-request" href="/resources/contributing">
+    Learn how to contribute code to Jan
+  </Card>
+  <Card title="Core Library" icon="diagram-project" href="/core/overview">
+    Understand Jan's core library and architecture
+  </Card>
+</CardGroup>

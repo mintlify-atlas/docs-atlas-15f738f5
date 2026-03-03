@@ -1,0 +1,312 @@
+---
+title: "Managing Models"
+description: "Download, configure, and optimize AI models for the Jan desktop app"
+---
+
+## Model Hub
+
+Jan provides access to a curated collection of open-source AI models.
+
+### Browsing Models
+
+1. Click **Models** in the sidebar (or navigate to Settings > Models)
+2. Browse available models by:
+   - **Capability** - Text, vision, code
+   - **Size** - Parameter count and memory requirements
+   - **Provider** - Model architecture (LLaMA, Mistral, etc.)
+
+### Model Information
+
+Each model listing shows:
+
+- **Model name** and version
+- **Parameter size** (7B, 13B, 70B, etc.)
+- **Quantization** - Model compression level (Q4, Q5, Q8, etc.)
+- **Memory requirements** - RAM/VRAM needed
+- **Capabilities** - Text, vision, tools, code
+- **Download size** - File size for download
+
+## Downloading Models
+
+### From the Model Hub
+
+1. Find a model you want to use
+2. Click the **Download** icon
+3. Monitor download progress in the notification area
+4. Once complete, the model appears in your model list
+
+<Info>
+Downloads can be paused and resumed. Jan saves partial downloads if interrupted.
+</Info>
+
+### Quantization Levels
+
+Models are available in different quantization levels:
+
+| Level | Quality | Speed | Memory | Best For |
+|-------|---------|-------|--------|----------|
+| Q4 | Good | Fast | Lowest | Limited resources |
+| Q5 | Better | Moderate | Low | Balanced performance |
+| Q6 | High | Slower | Medium | Quality on mid-range hardware |
+| Q8 | Very High | Slow | High | Maximum quality |
+| F16 | Best | Slowest | Highest | Professional use, high-end GPUs |
+
+<Tip>
+Start with Q4 or Q5 models to test performance, then upgrade to higher quantization if your system handles it well.
+</Tip>
+
+### Vision Models
+
+For image understanding capabilities:
+
+1. Download a model with vision support
+2. Jan automatically downloads the required **mmproj** file
+3. The model will be available for image input
+
+Vision models can:
+- Describe images
+- Answer questions about visual content
+- Extract text from images (OCR)
+- Analyze screenshots and diagrams
+
+## Importing Models
+
+### Import from Hugging Face
+
+1. Go to **Settings > Models**
+2. Click **Import Model**
+3. Enter the Hugging Face model repository URL
+4. (Optional) Add your Hugging Face token for gated models
+5. Select the specific model file to import
+6. Click **Import**
+
+<CodeGroup>
+```bash Example URLs
+https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf
+https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
+```
+</CodeGroup>
+
+### Import Local Models
+
+1. Go to **Settings > Models**
+2. Click **Import Model**
+3. Select **Browse** to choose a local GGUF file
+4. Verify model settings
+5. Click **Import**
+
+<Warning>
+Only GGUF format models are supported. Other formats (safetensors, PyTorch) must be converted first.
+</Warning>
+
+## Configuring Models
+
+### Model Settings
+
+Edit model settings to optimize performance:
+
+1. Go to **Settings > Models**
+2. Click on a downloaded model
+3. Click the **Edit** icon
+4. Adjust settings:
+
+#### Context Length (ctx_len)
+Maximum number of tokens the model can process.
+
+- **Default:** 4096-8192 tokens
+- **Higher values:** More context, more memory usage
+- **Lower values:** Less memory, shorter conversations
+
+<Tip>
+Jan will suggest increasing context length automatically if you exceed the limit during a conversation.
+</Tip>
+
+#### GPU Layers (ngl)
+Number of model layers to run on GPU.
+
+- **0** - CPU only (slower but works on any system)
+- **Max** - All layers on GPU (fastest, requires sufficient VRAM)
+- **Partial** - Split between CPU and GPU
+
+<Info>
+Jan auto-detects optimal GPU layer count based on available VRAM. Adjust manually for fine-tuning.
+</Info>
+
+#### Parallel Processing (n_parallel)
+Number of simultaneous sequences to process.
+
+- **1** - Single request at a time
+- **2-4** - Multiple requests (uses more memory)
+
+#### CPU Threads
+Number of CPU threads for inference.
+
+- **Auto** - Uses system optimal value
+- **Manual** - Set specific thread count
+
+#### Prompt Template
+Defines how messages are formatted for the model.
+
+- Most models include default templates
+- Custom templates for fine-tuned models
+- Follow the model's instruction format
+
+### Runtime Parameters
+
+These can be set per-model or per-conversation:
+
+- **Temperature** - Response randomness (0.0-2.0)
+- **Max Tokens** - Maximum response length
+- **Top P** - Nucleus sampling threshold
+- **Top K** - Token selection limit
+- **Presence Penalty** - Reduces topic repetition
+- **Frequency Penalty** - Reduces phrase repetition
+
+## Model Providers
+
+### LlamaCpp (Built-in)
+
+Jan's default engine for running GGUF models locally:
+
+- **Supports:** Most open-source models
+- **Formats:** GGUF
+- **Features:** CPU/GPU acceleration, vision models
+- **Configuration:** Settings > Providers > LlamaCpp
+
+### External Providers
+
+Connect to external AI services:
+
+1. Go to **Settings > Providers**
+2. Click **Add Provider**
+3. Configure provider settings:
+   - API endpoint
+   - API key (if required)
+   - Model mappings
+4. Save and test connection
+
+Supported external providers:
+- OpenAI API
+- Anthropic Claude
+- Custom OpenAI-compatible endpoints
+
+## Managing Model Storage
+
+### Viewing Storage Usage
+
+1. Go to **Settings > Advanced**
+2. View **Jan Data Folder** location
+3. See total storage used by models
+
+### Deleting Models
+
+1. Go to **Settings > Models**
+2. Find the model to remove
+3. Click the **Delete** icon
+4. Confirm deletion
+
+<Warning>
+Deleting a model removes all downloaded files. You'll need to re-download if you want to use it again.
+</Warning>
+
+### Changing Model Location
+
+To move models to a different drive:
+
+1. Go to **Settings > Advanced**
+2. Click **Change** next to Jan Data Folder
+3. Select new location
+4. Jan will move existing models (or prompt to restart)
+
+## Performance Optimization
+
+### System Resources
+
+Monitor resource usage:
+
+- **CPU** - Processing load
+- **RAM** - Memory usage
+- **GPU** - VRAM and utilization
+
+View real-time stats in the **System Monitor** (top-right corner).
+
+### Optimization Tips
+
+<AccordionGroup>
+  <Accordion title="Low RAM Systems (<16GB)">
+    - Use Q4 quantized models
+    - Choose smaller parameter counts (7B or less)
+    - Reduce context length to 2048-4096
+    - Disable parallel processing
+    - Run fewer GPU layers
+  </Accordion>
+  
+  <Accordion title="Mid-Range Systems (16-32GB)">
+    - Use Q5 or Q6 models
+    - Try 7B-13B parameter models
+    - Context length: 4096-8192
+    - Enable partial GPU acceleration
+    - Use 2 parallel sequences if needed
+  </Accordion>
+  
+  <Accordion title="High-End Systems (32GB+)">
+    - Use Q8 or F16 models
+    - Run 13B-70B parameter models
+    - Context length: 8192-32768
+    - Full GPU acceleration
+    - Enable continuous batching
+  </Accordion>
+</AccordionGroup>
+
+### GPU Acceleration
+
+For NVIDIA GPUs:
+
+1. Ensure CUDA drivers are installed
+2. Jan automatically detects CUDA support
+3. Set GPU layers in model settings
+4. Monitor VRAM usage to avoid out-of-memory errors
+
+For Apple Silicon (M1/M2/M3):
+
+1. Jan uses Metal acceleration automatically
+2. GPU layers apply to Apple Neural Engine
+3. Unified memory shared between CPU and GPU
+
+## Model Capabilities
+
+### Text Generation
+All models support basic text generation:
+- Conversational responses
+- Content creation
+- Question answering
+- Summarization
+
+### Vision
+Models with vision support can:
+- Analyze images
+- Extract text (OCR)
+- Describe visual content
+- Answer questions about images
+
+Requires downloading mmproj weights.
+
+### Tool Calling
+Models with tool support can:
+- Search documents (RAG)
+- Execute functions
+- Use MCP servers
+- Call external APIs
+
+Requires explicit tool definitions.
+
+### Code Generation
+Code-specialized models excel at:
+- Writing functions
+- Debugging code
+- Code review
+- Technical explanations
+
+<Tip>
+Use models with "Code" or "Coder" in their name for programming tasks.
+</Tip>

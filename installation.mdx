@@ -1,0 +1,712 @@
+---
+title: Installation
+description: Complete installation guide for Jan on Windows, macOS, and Linux with GPU acceleration setup.
+---
+
+# Installation
+
+Complete platform-specific installation instructions for Jan, including system requirements, GPU acceleration setup, and troubleshooting.
+
+<Tabs items={["Windows", "macOS", "Linux"]}>
+  <Tab>
+    ## Windows Installation
+
+    ### System Requirements
+
+    **Operating System:**
+    - Windows 10 or higher
+
+    **CPU:**
+    - Intel: Haswell (Q2 2013) or newer
+    - Intel Celeron/Pentium: Tiger Lake (Q3 2020) or newer
+    - AMD: Excavator (Q2 2015) or newer
+
+    <Note>
+    Processor must support **AVX2 or newer**. See [full list of supported processors](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2). Performance is significantly degraded on AVX-only processors.
+    </Note>
+
+    **Memory (RAM):**
+    - 8GB → up to 3B parameter models (int4)
+    - 16GB → up to 7B parameter models (int4)
+    - 32GB → up to 13B parameter models (int4)
+
+    <Info>
+    Newer RAM generations (DDR4, DDR5) provide better performance.
+    </Info>
+
+    **GPU (Optional but Recommended):**
+    - 6GB VRAM → up to 3B parameter models
+    - 8GB VRAM → up to 7B parameter models
+    - 12GB VRAM → up to 13B parameter models
+
+    Supported GPUs:
+    - NVIDIA (CUDA 11.7+)
+    - AMD (Vulkan)
+    - Intel Arc (Vulkan)
+
+    **Storage:**
+    - 10GB minimum free space for app and models
+
+    ### Installation Steps
+
+    <Steps>
+      <Step title="Download Jan">
+        Choose your release channel:
+
+        **Stable Release (Recommended):**
+        - [Download jan.exe](https://app.jan.ai/download/latest/win-x64)
+        - Official website: [jan.ai/download](https://jan.ai/download)
+        - Microsoft Store: [Get Jan](https://apps.microsoft.com/detail/xpdcnfn5cpzlqb)
+
+        **Beta Release:**
+        - [Download Beta](https://app.jan.ai/download/beta/win-x64)
+        - Contains newer features but may be unstable
+
+        **Nightly Release:**
+        - [Download Nightly](https://app.jan.ai/download/nightly/win-x64)
+        - Development build with latest features (unstable)
+      </Step>
+
+      <Step title="Install Jan">
+        1. Run the downloaded `jan.exe` file
+        2. Follow the installation wizard
+        3. Wait for installation to complete
+        4. Launch Jan from the Start menu or desktop shortcut
+      </Step>
+
+      <Step title="Configure GPU Acceleration (Optional)">
+        For significantly better performance, enable GPU acceleration:
+
+        **NVIDIA GPU Setup:**
+
+        1. **Install NVIDIA Driver** (version 470.63.01 or higher)
+           - Download from [NVIDIA Drivers](https://www.nvidia.com/en-us/drivers/)
+           - Verify installation:
+             ```bash
+             nvidia-smi
+             ```
+
+        2. **Install CUDA Toolkit** (version 11.7 or higher)
+           - Download from [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
+           - Verify installation:
+             ```bash
+             nvcc --version
+             ```
+
+        3. **Enable in Jan:**
+           - Open Jan
+           - Go to **Settings** → **Hardware** → **GPUs**
+           - Toggle GPU acceleration **ON**
+
+        **AMD or Intel Arc GPU Setup:**
+
+        1. Ensure latest GPU drivers are installed
+        2. Vulkan support is required (usually included with drivers)
+        3. **Enable in Jan:**
+           - Open Jan
+           - Go to **Settings** → **Hardware** → **GPUs**
+           - Toggle GPU acceleration **ON**
+      </Step>
+    </Steps>
+
+    ### Data Folder Location
+
+    Jan stores all data in:
+    ```
+    C:\Users\<YourUsername>\AppData\Roaming\Jan\data
+    ```
+
+    This includes:
+    - Downloaded models
+    - Chat history
+    - Settings and preferences
+    - Extensions and plugins
+
+    <Card title="Jan Data Folder Guide" icon="folder" href="https://jan.ai/docs/desktop/data-folder">
+      Complete folder structure and customization options.
+    </Card>
+
+    ### Uninstalling Jan
+
+    <Steps>
+      <Step title="Remove Application">
+        1. Open **Control Panel**
+        2. Go to **Programs** → **Uninstall a program**
+        3. Find **Jan** in the list
+        4. Right-click → **Uninstall**
+        5. Confirm the uninstallation
+      </Step>
+
+      <Step title="Clean Up Data (Optional)">
+        Remove all app data and settings:
+
+        **Via File Explorer:**
+        1. Press `Win + R`
+        2. Type `%APPDATA%` and press Enter
+        3. Delete the `Jan` folder
+
+        **Via Command Line:**
+        ```bash
+        cd %APPDATA%
+        rmdir /S Jan
+        ```
+
+        <Warning>
+        This permanently deletes all chat history, downloaded models, and settings. Back up important data first.
+        </Warning>
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab>
+    ## macOS Installation
+
+    Jan runs natively on both Apple Silicon and Intel-based Macs.
+
+    ### System Requirements
+
+    **Operating System:**
+    - macOS 13.6 (Ventura) or higher
+
+    **Memory (RAM):**
+    - 8GB → up to 3B parameter models
+    - 16GB → up to 7B parameter models
+    - 32GB → up to 13B parameter models
+
+    **Storage:**
+    - 10GB+ free space for app and models
+
+    **Processor:**
+    - **Apple Silicon (M1/M2/M3)**: Metal acceleration enabled by default (recommended)
+    - **Intel-based Mac**: CPU processing only (slower)
+
+    <Info>
+    **Apple Silicon Macs** use Metal for GPU acceleration, making them significantly faster than Intel-based Macs which operate on CPU only.
+    </Info>
+
+    To check your Mac's processor:
+    - Click Apple menu () → **About This Mac**
+    - Look for "Chip" (Apple Silicon) or "Processor" (Intel)
+
+    ### Installation Steps
+
+    <Steps>
+      <Step title="Download Jan">
+        Choose your release channel:
+
+        **Stable Release (Recommended):**
+        - [Download jan.dmg](https://app.jan.ai/download/latest/mac-universal)
+        - Official website: [jan.ai/download](https://jan.ai/download)
+
+        **Beta Release:**
+        - [Download Beta](https://app.jan.ai/download/beta/mac-universal)
+        - Contains newer features but may have bugs
+
+        **Nightly Release:**
+        - [Download Nightly](https://app.jan.ai/download/nightly/mac-universal)
+        - Latest features, less stable
+
+        <Note>
+        The universal build works on both Apple Silicon and Intel Macs.
+        </Note>
+      </Step>
+
+      <Step title="Install Jan">
+        1. Open the downloaded `jan.dmg` file
+        2. Drag the **Jan** icon to the **Applications** folder
+        3. Wait for the copy to complete
+        4. Open **Applications** and launch **Jan**
+
+        <Tip>
+        If macOS shows a security warning, go to **System Preferences** → **Security & Privacy** and click **Open Anyway**.
+        </Tip>
+      </Step>
+
+      <Step title="GPU Acceleration">
+        **Apple Silicon (M1/M2/M3):**
+        - Metal acceleration is automatic
+        - No configuration needed
+        - Significantly faster than CPU-only
+
+        **Intel-based Mac:**
+        - Runs on CPU only
+        - No GPU acceleration available
+        - Still works but slower for larger models
+      </Step>
+    </Steps>
+
+    ### Data Folder Location
+
+    Jan stores all data in:
+    ```bash
+    ~/Library/Application Support/Jan/data
+    ```
+
+    This includes:
+    - Downloaded models
+    - Chat history
+    - Settings and preferences
+    - Extensions and plugins
+
+    <Card title="Jan Data Folder Guide" icon="folder" href="https://jan.ai/docs/desktop/data-folder">
+      Complete folder structure and customization options.
+    </Card>
+
+    ### Uninstalling Jan
+
+    <Steps>
+      <Step title="Remove Application">
+        1. Close Jan if it's running
+        2. Open **Finder**
+        3. Go to **Applications**
+        4. Find **Jan**
+        5. Choose one:
+           - Drag to **Trash**
+           - Right-click → **Move to Trash**
+           - Select and press **Command-Delete**
+        6. Empty the Trash
+      </Step>
+
+      <Step title="Clean Up Data (Optional)">
+        Remove all app data and settings:
+
+        ```bash
+        rm -rf ~/Library/Application\ Support/Jan
+        ```
+
+        <Warning>
+        This permanently deletes all chat history, downloaded models, and settings. Back up important data first.
+        </Warning>
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab>
+    ## Linux Installation
+
+    ### System Requirements
+
+    **Supported Distributions:**
+
+    **Debian-based** (supports `.deb` and `AppImage`):
+    - Ubuntu Desktop LTS
+    - Linux Mint
+    - Pop!_OS
+    - Debian
+    - Kubuntu, Lubuntu, Xubuntu
+
+    **RHEL-based** (supports `.rpm` and `AppImage`):
+    - Fedora
+    - RHEL (server only)
+
+    **Arch-based**:
+    - Arch Linux
+    - SteamOS
+
+    **Independent**:
+    - openSUSE
+
+    **CPU:**
+    - Intel Haswell (Q2 2013) or newer
+    - Intel Celeron/Pentium: Tiger Lake (Q3 2020) or newer
+    - AMD Excavator (Q2 2015) or newer
+
+    <Note>
+    CPU must support **AVX2**. See [supported processors](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2).
+    </Note>
+
+    **Memory (RAM):**
+    - 8GB → up to 3B parameter models (int4)
+    - 16GB → up to 7B parameter models (int4)
+    - 32GB → up to 13B parameter models (int4)
+
+    **GPU (Optional):**
+    - 6GB VRAM → up to 3B parameter models
+    - 8GB VRAM → up to 7B parameter models
+    - 12GB VRAM → up to 13B parameter models
+
+    Supported:
+    - NVIDIA (CUDA 11.7+)
+    - AMD (Vulkan)
+    - Intel Arc (Vulkan)
+
+    **Storage:**
+    - 10GB+ free disk space
+
+    ### Installation Steps
+
+    <Steps>
+      <Step title="Download Jan">
+        Choose your distribution and release channel:
+
+        **Stable Release (Recommended):**
+
+        Ubuntu/Debian:
+        ```bash
+        wget https://app.jan.ai/download/latest/linux-amd64-deb -O jan.deb
+        ```
+
+        Other distributions (AppImage):
+        ```bash
+        wget https://app.jan.ai/download/latest/linux-amd64-appimage -O jan.AppImage
+        ```
+
+        Flathub:
+        ```bash
+        flatpak install flathub ai.jan.Jan
+        ```
+
+        **Beta Release:**
+        - Ubuntu/Debian: [jan.deb](https://app.jan.ai/download/beta/linux-amd64-deb)
+        - Others: [Jan.AppImage](https://app.jan.ai/download/beta/linux-amd64-appimage)
+
+        **Nightly Release:**
+        - Ubuntu/Debian: [jan.deb](https://app.jan.ai/download/nightly/linux-amd64-deb)
+        - Others: [Jan.AppImage](https://app.jan.ai/download/nightly/linux-amd64-appimage)
+      </Step>
+
+      <Step title="Install Jan">
+        **Ubuntu/Debian (.deb):**
+
+        Using dpkg:
+        ```bash
+        sudo dpkg -i jan.deb
+        ```
+
+        Using apt-get (recommended - handles dependencies):
+        ```bash
+        sudo apt-get install ./jan.deb
+        ```
+
+        Launch:
+        ```bash
+        jan
+        ```
+
+        **Other Distributions (AppImage):**
+
+        ```bash
+        # Make executable
+        chmod +x jan.AppImage
+        
+        # Run
+        ./jan.AppImage
+        ```
+
+        **Flathub:**
+
+        ```bash
+        flatpak run ai.jan.Jan
+        ```
+      </Step>
+
+      <Step title="Configure GPU Acceleration (Optional)">
+        **NVIDIA GPU Setup:**
+
+        1. **Check GPU Detection:**
+           ```bash
+           lspci | grep -i nvidia
+           ```
+
+        2. **Install NVIDIA Driver:**
+           ```bash
+           # Ubuntu/Debian
+           sudo apt update
+           sudo apt install nvidia-driver-XXX
+           
+           # Fedora
+           sudo dnf install akmod-nvidia
+           
+           # Arch
+           sudo pacman -S nvidia nvidia-utils
+           ```
+
+           Verify:
+           ```bash
+           nvidia-smi
+           ```
+
+        3. **Install CUDA Toolkit** (11.7 or higher):
+           ```bash
+           # Ubuntu/Debian
+           sudo apt install nvidia-cuda-toolkit
+           
+           # Verify
+           nvcc --version
+           ```
+
+        4. **Install Additional Dependencies:**
+           ```bash
+           sudo apt install gcc-11 g++-11 cpp-11
+           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+           ```
+
+        5. **Enable in Jan:**
+           - Open Jan
+           - Go to **Settings** → **Local Engine** → **Llama.cpp**
+           - Select **CUDA** backend (better performance than Vulkan)
+
+        <Info>
+        CUDA offers significantly better performance than Vulkan for NVIDIA GPUs.
+        </Info>
+
+        **AMD or Intel Arc GPU Setup:**
+
+        1. Ensure latest GPU drivers are installed
+        2. Verify Vulkan support:
+           ```bash
+           vulkaninfo | grep "GPU"
+           ```
+
+        3. **Enable in Jan:**
+           - Open Jan
+           - Go to **Settings** → **Hardware** → **GPUs**
+           - Toggle GPU acceleration **ON**
+           - Select **Vulkan** backend in **Settings** → **Local Engine** → **Llama.cpp**
+      </Step>
+    </Steps>
+
+    ### Data Folder Location
+
+    Jan stores all data in:
+    ```bash
+    # Default location
+    ~/.config/Jan/data
+    
+    # Or if XDG_CONFIG_HOME is set
+    $XDG_CONFIG_HOME/Jan/data
+    ```
+
+    This includes:
+    - Downloaded models
+    - Chat history
+    - Settings and preferences
+    - Extensions and plugins
+
+    <Card title="Jan Data Folder Guide" icon="folder" href="https://jan.ai/docs/desktop/data-folder">
+      Complete folder structure and customization options.
+    </Card>
+
+    ### Uninstalling Jan
+
+    **Ubuntu/Debian (.deb):**
+    ```bash
+    # Remove application
+    sudo apt-get remove jan
+    
+    # Remove all data
+    rm -rf ~/.config/Jan
+    ```
+
+    **AppImage:**
+    ```bash
+    # Remove application
+    rm jan.AppImage
+    
+    # Remove all data
+    rm -rf ~/.config/Jan
+    ```
+
+    **Flathub:**
+    ```bash
+    # Remove application
+    flatpak uninstall ai.jan.Jan
+    
+    # Remove all data
+    rm -rf ~/.var/app/ai.jan.Jan
+    ```
+
+    <Warning>
+    These commands permanently delete all chat history, downloaded models, and settings. Back up important data first.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Building from Source
+
+For developers who want to build Jan from source:
+
+### Prerequisites
+
+- **Node.js** ≥ 20.0.0
+- **Yarn** ≥ 1.22.0
+- **Make** ≥ 3.81
+- **Rust** (for Tauri)
+
+### Quick Build with Make
+
+```bash
+# Clone repository
+git clone https://github.com/janhq/jan
+cd jan
+
+# Full development setup and launch
+make dev
+```
+
+This handles everything: installs dependencies, builds core components, and launches the app.
+
+**Available Make Targets:**
+- `make dev` - Full development setup and launch
+- `make build` - Production build
+- `make test` - Run tests and linting
+- `make clean` - Delete everything and start fresh
+
+### Manual Build Commands
+
+If you prefer manual control:
+
+```bash
+# Install dependencies
+yarn install
+
+# Build Tauri plugin API
+yarn build:tauri:plugin:api
+
+# Build core components
+yarn build:core
+
+# Build extensions
+yarn build:extensions
+
+# Launch development server
+yarn dev
+```
+
+### Platform-Specific Builds
+
+**Windows:**
+```bash
+yarn build:tauri:win32
+```
+
+**macOS:**
+```bash
+yarn build:tauri:darwin
+```
+
+**Linux:**
+```bash
+yarn build:tauri:linux
+```
+
+<Card title="Contributing Guide" icon="code-branch" href="https://github.com/janhq/jan/blob/main/CONTRIBUTING.md">
+  Complete guide for contributing to Jan's development.
+</Card>
+
+## Troubleshooting
+
+### GPU Not Detected
+
+**NVIDIA:**
+- Verify driver installation: `nvidia-smi`
+- Check CUDA installation: `nvcc --version`
+- Ensure CUDA 11.7 or higher is installed
+- Restart Jan after installing drivers
+
+**AMD/Intel:**
+- Verify Vulkan support: `vulkaninfo`
+- Update GPU drivers to the latest version
+- Enable Vulkan backend in Settings
+
+**Apple Silicon:**
+- Metal acceleration is automatic
+- No configuration needed
+- If issues persist, try reinstalling Jan
+
+### Installation Fails
+
+**Windows:**
+- Run installer as Administrator
+- Disable antivirus temporarily
+- Check Windows Defender exclusions
+
+**macOS:**
+- Allow app in Security & Privacy settings
+- Right-click Jan → Open (first launch)
+- Check that macOS version is 13.6+
+
+**Linux:**
+- Install missing dependencies:
+  ```bash
+  sudo apt install libfuse2  # For AppImage
+  ```
+- Check file permissions:
+  ```bash
+  chmod +x jan.AppImage
+  ```
+
+### Performance Issues
+
+1. **Enable GPU acceleration** (Settings → Hardware)
+2. **Use smaller models** (3B-7B instead of 13B+)
+3. **Lower quantization** (Q4 instead of Q8)
+4. **Close other applications** to free up RAM/VRAM
+5. **Check system resources** (Task Manager / Activity Monitor)
+
+### App Won't Launch
+
+**Windows:**
+```bash
+# Check if process is running
+tasklist | findstr jan
+
+# Kill stuck process
+taskkill /F /IM jan.exe
+```
+
+**macOS/Linux:**
+```bash
+# Check if process is running
+ps aux | grep jan
+
+# Kill stuck process
+killall jan
+```
+
+### Data Folder Issues
+
+If you need to move or reset your data folder:
+
+1. Close Jan
+2. Back up existing data folder
+3. Delete the folder (see locations above)
+4. Restart Jan (creates fresh folder)
+5. Restore backed-up models/chats if needed
+
+<Card title="Full Troubleshooting Guide" icon="life-ring" href="https://jan.ai/docs/desktop/troubleshooting">
+  Comprehensive troubleshooting documentation for all platforms.
+</Card>
+
+## Getting Help
+
+If you encounter issues during installation:
+
+1. **Check Troubleshooting Docs**: [jan.ai/docs/desktop/troubleshooting](https://jan.ai/docs/desktop/troubleshooting)
+2. **Search GitHub Issues**: [github.com/janhq/jan/issues](https://github.com/janhq/jan/issues)
+3. **Ask in Discord**: [Join #🆘|jan-help](https://discord.gg/FTk2MvZwJH) channel
+4. **Report Bugs**: [Create new issue](https://github.com/janhq/jan/issues/new)
+
+When reporting issues, include:
+- Operating system and version
+- Jan version (Help → About)
+- Hardware specs (CPU, RAM, GPU)
+- Complete error messages
+- Steps to reproduce
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart Guide" icon="rocket" href="/quickstart">
+    Get from installation to your first chat in minutes.
+  </Card>
+  <Card title="Model Parameters" icon="sliders" href="https://jan.ai/docs/desktop/model-parameters">
+    Learn how to fine-tune model behavior.
+  </Card>
+  <Card title="MCP Integration" icon="puzzle" href="https://jan.ai/docs/desktop/mcp">
+    Enable agentic capabilities with tools and integrations.
+  </Card>
+  <Card title="API Reference" icon="code" href="https://jan.ai/api-reference">
+    Build integrations with Jan's OpenAI-compatible API.
+  </Card>
+</CardGroup>

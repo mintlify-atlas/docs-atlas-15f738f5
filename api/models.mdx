@@ -1,0 +1,382 @@
+---
+title: Models
+description: List and retrieve models available in Jan.
+---
+
+## List Models
+
+Lists all models currently available in your Jan instance.
+
+<CodeGroup>
+```bash cURL
+curl http://127.0.0.1:1337/v1/models \
+  -H "Authorization: Bearer secret-key-123"
+```
+
+```python Python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+```javascript JavaScript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:1337/v1',
+  apiKey: 'secret-key-123'
+});
+
+const models = await client.models.list();
+models.data.forEach(model => {
+  console.log(model.id);
+});
+```
+</CodeGroup>
+
+### Response
+
+<ResponseField name="object" type="string">
+  Always `list`.
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of model objects available in Jan.
+  
+  Each model contains:
+  - `id` (string): The model identifier that can be referenced in API endpoints
+  - `object` (string): Always `"model"`
+  - `created` (number): Unix timestamp of when the model was created
+  - `owned_by` (string): The organization or author of the model
+  - `name` (string): Human-readable name of the model
+  - `version` (string): Model version
+  - `format` (string): Model format (e.g., `"gguf"`)
+  - `engine` (string): Inference engine (e.g., `"llama.cpp"`)
+  - `description` (string): Model description
+  - `settings` (object): Model configuration settings
+  - `parameters` (object): Runtime parameters
+  - `metadata` (object): Additional model metadata
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "llama3-8b-instruct",
+      "object": "model",
+      "created": 1699896916,
+      "owned_by": "Meta",
+      "name": "Llama 3 8B Instruct",
+      "version": "1.0",
+      "format": "gguf",
+      "engine": "llama.cpp",
+      "description": "Meta's Llama 3 8B instruction-tuned model",
+      "settings": {
+        "ctx_len": 8192,
+        "ngl": 33,
+        "embedding": false,
+        "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+      },
+      "parameters": {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "max_tokens": 4096,
+        "stream": true
+      },
+      "metadata": {
+        "author": "Meta",
+        "tags": ["instruct", "chat", "8b"],
+        "size": 4661211136
+      }
+    },
+    {
+      "id": "qwen2.5-7b-instruct",
+      "object": "model",
+      "created": 1699896917,
+      "owned_by": "Alibaba",
+      "name": "Qwen 2.5 7B Instruct",
+      "version": "1.0",
+      "format": "gguf",
+      "engine": "llama.cpp",
+      "description": "Alibaba's Qwen 2.5 7B instruction-tuned model",
+      "settings": {
+        "ctx_len": 32768,
+        "ngl": 33,
+        "embedding": false
+      },
+      "parameters": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "max_tokens": 2048,
+        "stream": true
+      },
+      "metadata": {
+        "author": "Alibaba",
+        "tags": ["instruct", "chat", "7b"],
+        "size": 4370000000
+      }
+    }
+  ]
+}
+```
+
+## Retrieve Model
+
+Retrieves detailed information about a specific model.
+
+<CodeGroup>
+```bash cURL
+curl http://127.0.0.1:1337/v1/models/llama3-8b-instruct \
+  -H "Authorization: Bearer secret-key-123"
+```
+
+```python Python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+model = client.models.retrieve("llama3-8b-instruct")
+print(model.id)
+print(model.owned_by)
+```
+
+```javascript JavaScript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:1337/v1',
+  apiKey: 'secret-key-123'
+});
+
+const model = await client.models.retrieve('llama3-8b-instruct');
+console.log(model.id);
+console.log(model.owned_by);
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="model_id" type="string" required>
+  The ID of the model to retrieve.
+</ParamField>
+
+### Response
+
+Returns a model object with the following fields:
+
+<ResponseField name="id" type="string">
+  The model identifier that can be referenced in API endpoints.
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  Always `"model"`.
+</ResponseField>
+
+<ResponseField name="created" type="number">
+  Unix timestamp (in seconds) of when the model was created.
+</ResponseField>
+
+<ResponseField name="owned_by" type="string">
+  The organization or author that created the model.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Human-readable name used in the UI.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  The version of the model.
+</ResponseField>
+
+<ResponseField name="format" type="string">
+  The format of the model file (e.g., `"gguf"`, `"safetensors"`).
+</ResponseField>
+
+<ResponseField name="engine" type="string">
+  The inference engine used to run this model (e.g., `"llama.cpp"`, `"onnxruntime"`).
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  A description of the model and its capabilities.
+</ResponseField>
+
+<ResponseField name="sources" type="array">
+  Download sources for the model.
+  - `filename` (string): The filename of the model artifact
+  - `url` (string): URL where the model can be downloaded
+</ResponseField>
+
+<ResponseField name="settings" type="object">
+  Model configuration settings.
+  
+  Common settings:
+  - `ctx_len` (number): Context length/window size
+  - `ngl` (number): Number of GPU layers to offload
+  - `embedding` (boolean): Whether this is an embedding model
+  - `prompt_template` (string): Template for formatting prompts
+  - `system_prompt` (string): Default system prompt
+  - `cpu_threads` (number): Number of CPU threads to use
+  - `n_parallel` (number): Number of parallel sequences
+  - `temperature` (number): Sampling temperature
+  - `top_p` (number): Nucleus sampling threshold
+  - `top_k` (number): Top-k sampling parameter
+  - `min_p` (number): Minimum probability threshold
+  - `repeat_penalty` (number): Repetition penalty
+  - `presence_penalty` (number): Presence penalty
+  - `frequency_penalty` (number): Frequency penalty
+</ResponseField>
+
+<ResponseField name="parameters" type="object">
+  Default runtime parameters for inference.
+  - `temperature` (number): Default sampling temperature
+  - `top_p` (number): Default nucleus sampling parameter
+  - `top_k` (number): Default top-k parameter
+  - `max_tokens` (number): Default maximum tokens to generate
+  - `stream` (boolean): Whether streaming is enabled by default
+  - `stop` (array): Default stop sequences
+  - `frequency_penalty` (number): Default frequency penalty
+  - `presence_penalty` (number): Default presence penalty
+</ResponseField>
+
+<ResponseField name="metadata" type="object">
+  Additional metadata about the model.
+  - `author` (string): Model author or organization
+  - `tags` (array): Tags describing the model
+  - `size` (number): Model file size in bytes
+  - `cover` (string): URL to model cover image
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "id": "llama3-8b-instruct",
+  "object": "model",
+  "created": 1699896916,
+  "owned_by": "Meta",
+  "name": "Llama 3 8B Instruct",
+  "version": "1.0",
+  "format": "gguf",
+  "engine": "llama.cpp",
+  "description": "Meta's Llama 3 8B instruction-tuned model optimized for chat and dialogue use cases.",
+  "sources": [
+    {
+      "filename": "llama-3-8b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF"
+    }
+  ],
+  "settings": {
+    "ctx_len": 8192,
+    "ngl": 33,
+    "embedding": false,
+    "cpu_threads": 4,
+    "prompt_template": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_message}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+    "system_prompt": "You are a helpful, respectful and honest assistant."
+  },
+  "parameters": {
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "top_k": 40,
+    "max_tokens": 4096,
+    "stream": true,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "stop": ["<|eot_id|>"]
+  },
+  "metadata": {
+    "author": "Meta",
+    "tags": ["instruct", "chat", "8b", "llama3"],
+    "size": 4661211136
+  }
+}
+```
+
+## Model Types
+
+Jan supports different types of models:
+
+### Chat Models
+
+Models optimized for conversational interactions. These models have:
+- `embedding: false`
+- Prompt templates for chat formatting
+- Support for multi-turn conversations
+
+Examples: `llama3-8b-instruct`, `qwen2.5-7b-instruct`, `mistral-7b-instruct`
+
+### Embedding Models
+
+Models that generate vector embeddings for text. These models have:
+- `embedding: true`
+- Different API endpoint (`/v1/embeddings`)
+- Output vector representations instead of text
+
+Examples: `nomic-embed-text`, `sentence-transformers`
+
+### Vision Models
+
+Models that can process both text and images. These models have:
+- `vision_model: true`
+- `mmproj` setting for vision projection
+- Support multimodal input in chat completions
+
+Examples: `llava-v1.6-7b`, `bakllava`
+
+## Model Settings
+
+Key model settings you can configure:
+
+### Context Length (`ctx_len`)
+The maximum number of tokens the model can process in its context window. Larger values allow longer conversations but require more memory.
+
+### GPU Layers (`ngl`)
+Number of model layers to offload to GPU. Higher values improve performance but require more VRAM.
+
+### CPU Threads (`cpu_threads`)
+Number of CPU threads to use for inference. More threads can improve performance on CPU.
+
+### Prompt Template
+Defines how messages are formatted before being sent to the model. Different models require different formatting.
+
+## Error Responses
+
+### Model Not Found
+
+```json
+{
+  "error": {
+    "message": "Model 'invalid-model-id' not found",
+    "type": "invalid_request_error",
+    "code": "model_not_found"
+  }
+}
+```
+
+Status: `404 Not Found`
+
+### Unauthorized
+
+```json
+{
+  "error": {
+    "message": "Invalid API key",
+    "type": "authentication_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+Status: `401 Unauthorized`

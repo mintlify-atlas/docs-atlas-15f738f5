@@ -1,0 +1,359 @@
+---
+title: System Requirements
+description: Hardware and software requirements for running Jan on macOS, Windows, and Linux.
+---
+
+# System Requirements
+
+Jan runs on macOS, Windows, and Linux. Requirements vary based on the size of models you want to run.
+
+## Operating System Requirements
+
+<CardGroup cols={3}>
+  <Card title="macOS" icon="apple">
+    **Minimum:** macOS 13.6 (Ventura) or later
+    
+    **Recommended:** macOS 14+ (Sonoma)
+    
+    **Architecture:** Intel or Apple Silicon
+  </Card>
+  
+  <Card title="Windows" icon="windows">
+    **Minimum:** Windows 10 (64-bit)
+    
+    **Recommended:** Windows 11
+    
+    **GPU Support:** NVIDIA, AMD, Intel Arc
+  </Card>
+  
+  <Card title="Linux" icon="linux">
+    **Supported:** Most distributions
+    
+    **Tested:** Ubuntu 18.04+, Debian, Fedora
+    
+    **GPU Support:** NVIDIA (CUDA 11.7+)
+  </Card>
+</CardGroup>
+
+## RAM Requirements by Model Size
+
+Choose models based on your available RAM. For best performance, use models that consume less than 80% of your system RAM.
+
+<Tabs>
+  <Tab title="8GB RAM">
+    ### Small Models (3B parameters)
+    
+    **Model Size:** 2-4GB
+    
+    **Examples:**
+    - Llama 3B
+    - Phi-2
+    - Gemma 2B
+    
+    **Performance:**
+    - Good for basic conversations
+    - Lightweight coding assistance
+    - Fast response times
+    
+    <Warning>
+    Avoid models larger than 6GB with 8GB RAM systems.
+    </Warning>
+  </Tab>
+  
+  <Tab title="16GB RAM">
+    ### Medium Models (7B parameters)
+    
+    **Model Size:** 4-8GB
+    
+    **Examples:**
+    - Llama 3 8B
+    - Mistral 7B
+    - Qwen 2.5 7B
+    
+    **Performance:**
+    - Strong general-purpose capabilities
+    - Good coding and reasoning
+    - Balanced speed and quality
+    
+    <Info>
+    Recommended sweet spot for most users.
+    </Info>
+  </Tab>
+  
+  <Tab title="32GB RAM">
+    ### Large Models (13B+ parameters)
+    
+    **Model Size:** 8-16GB
+    
+    **Examples:**
+    - Llama 3 13B
+    - Mixtral 8x7B
+    - Qwen 2.5 14B
+    
+    **Performance:**
+    - Excellent quality and reasoning
+    - Advanced coding capabilities
+    - Longer context handling
+    
+    Can also run multiple smaller models simultaneously.
+  </Tab>
+  
+  <Tab title="64GB+ RAM">
+    ### Extra Large Models (70B+ parameters)
+    
+    **Model Size:** 40GB+
+    
+    **Examples:**
+    - Llama 3 70B
+    - Qwen 2.5 72B
+    
+    **Performance:**
+    - State-of-the-art quality
+    - Complex reasoning tasks
+    - Professional use cases
+    
+    <Info>
+    GPU acceleration highly recommended for these models.
+    </Info>
+  </Tab>
+</Tabs>
+
+## GPU Requirements (Optional)
+
+GPU acceleration significantly improves performance but is not required.
+
+### NVIDIA GPUs
+
+<Tabs>
+  <Tab title="Windows">
+    **Requirements:**
+    - NVIDIA GPU (GTX 10 series or newer recommended)
+    - NVIDIA Driver 470.63.01 or higher
+    - CUDA Toolkit 11.7 or higher
+    
+    **Installation:**
+    1. Download [NVIDIA Driver](https://www.nvidia.com/en-us/drivers/)
+    2. Install [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
+    3. Restart your computer
+    4. Launch Jan - GPU will be detected automatically
+    
+    **Verify Installation:**
+    ```bash
+    nvidia-smi
+    nvcc --version
+    ```
+  </Tab>
+  
+  <Tab title="Linux">
+    **Requirements:**
+    - NVIDIA GPU (GTX 10 series or newer recommended)
+    - NVIDIA Driver 470.63.01 or higher
+    - CUDA Toolkit 11.7 or higher
+    - GCC 11+ with C++17 support
+    
+    **Installation:**
+    ```bash
+    # Install NVIDIA driver
+    sudo apt update
+    sudo apt install nvidia-driver-535
+    
+    # Install CUDA toolkit
+    # Download from https://developer.nvidia.com/cuda-downloads
+    
+    # Install GCC
+    sudo apt install gcc-11 g++-11 cpp-11
+    
+    # Set up environment
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+    ```
+    
+    **Verify Installation:**
+    ```bash
+    nvidia-smi
+    nvcc --version
+    ```
+  </Tab>
+</Tabs>
+
+### AMD GPUs (Windows)
+
+**Requirements:**
+- AMD Radeon GPU (RX 5000 series or newer)
+- Latest AMD Adrenalin drivers
+
+**Note:** AMD support is experimental. Performance may vary.
+
+### Intel Arc (Windows)
+
+**Requirements:**
+- Intel Arc A-series GPU
+- Latest Intel Graphics drivers
+
+**Note:** Intel Arc support is experimental.
+
+### Apple Silicon (macOS)
+
+**Built-in Acceleration:**
+- M1, M2, M3, M4 chips have automatic Metal acceleration
+- No additional setup required
+- Excellent performance for model size
+
+## Verified Configurations
+
+These setups have been tested and confirmed working:
+
+### Desktop Configurations
+
+<Tabs>
+  <Tab title="Windows 11 Pro">
+    | Component | Specification |
+    |-----------|---------------|
+    | OS | Windows 11 Pro 64-bit |
+    | GPU | NVIDIA GeForce RTX 4070Ti |
+    | CUDA | 12.2 |
+    | Driver | 531.18 |
+    | RAM | 32GB |
+    
+    **Performance:** Excellent for 13B-70B models
+  </Tab>
+  
+  <Tab title="Ubuntu 22.04 LTS">
+    | Component | Specification |
+    |-----------|---------------|
+    | OS | Ubuntu 22.04 LTS |
+    | GPU | NVIDIA GeForce RTX 4070Ti |
+    | CUDA | 12.2 |
+    | Driver | 545 |
+    
+    **Performance:** Excellent for 13B-70B models
+  </Tab>
+  
+  <Tab title="macOS Sonoma">
+    | Component | Specification |
+    |-----------|---------------|
+    | OS | macOS 14+ (Sonoma) |
+    | Chip | M1 Max / M2 Pro / M3 |
+    | RAM | 32GB unified memory |
+    
+    **Performance:** Excellent for 13B-30B models
+  </Tab>
+</Tabs>
+
+### Virtual Machine Setups
+
+<Warning>
+VM performance is typically lower than bare metal installations.
+</Warning>
+
+**Ubuntu on Proxmox:**
+| Component | Specification |
+|-----------|---------------|
+| OS | Ubuntu 20.04/18.04 LTS |
+| VM | Proxmox |
+| GPU | NVIDIA GeForce GTX 1660Ti (passthrough) |
+| CUDA | 12.1 |
+| Driver | 535 |
+
+**Requirements for GPU Passthrough:**
+- IOMMU support enabled in BIOS
+- Proper GPU passthrough configuration
+- Dedicated GPU for VM
+
+## Storage Requirements
+
+### Application Size
+- **Jan Installation:** 500MB - 1GB
+- **System Dependencies:** 2-5GB (CUDA, drivers, etc.)
+
+### Model Storage
+
+Plan disk space based on models you want:
+
+| Model Size | Disk Space Needed |
+|------------|-------------------|
+| 3B models | 2-4GB per model |
+| 7B models | 4-8GB per model |
+| 13B models | 8-16GB per model |
+| 70B models | 40-80GB per model |
+
+**Recommended Free Space:** 50GB+ for comfortable model collection
+
+**Storage Location:**
+- **macOS:** `~/Library/Application Support/Jan`
+- **Windows:** `C:\Users\%USERNAME%\AppData\Roaming\Jan`
+- **Linux:** `~/.config/Jan`
+
+## Network Requirements
+
+### For Local Models
+- **Internet:** Only needed to download models initially
+- **Offline Use:** Fully functional once models are downloaded
+
+### For Cloud Integrations
+- **Internet:** Required for OpenAI, Anthropic, Groq connections
+- **Bandwidth:** Standard broadband sufficient
+
+## Performance Optimization
+
+<CardGroup cols={2}>
+  <Card title="CPU-Only Systems" icon="microchip">
+    - Use smaller models (3B-7B)
+    - Increase CPU threads in settings
+    - Close other applications
+    - Use SSDs for model storage
+  </Card>
+  
+  <Card title="GPU-Accelerated Systems" icon="bolt">
+    - Adjust GPU layers (ngl) parameter
+    - Start low and increase gradually
+    - Monitor VRAM usage
+    - Keep 1-2GB VRAM free for system
+  </Card>
+</CardGroup>
+
+## Compatibility Notes
+
+### Laptop Considerations
+- Laptop GPUs may have lower performance than desktop equivalents
+- Thermal throttling can affect sustained performance
+- Hybrid graphics (Optimus) may require additional configuration
+
+### Virtual RAM / Swap
+- Not recommended as primary RAM for models
+- Significantly slower than physical RAM
+- May cause poor performance
+
+## Quick Reference
+
+<Info>
+**Most users:** 16GB RAM + 7B models = great experience
+
+**Budget systems:** 8GB RAM + 3B models = functional
+
+**Power users:** 32GB+ RAM + GPU + 13B-70B models = excellent
+</Info>
+
+## Check Your System
+
+Before installing:
+
+1. **Check RAM:** 
+   - Windows: Task Manager → Performance → Memory
+   - macOS: About This Mac → Memory
+   - Linux: `free -h`
+
+2. **Check GPU (if applicable):**
+   - Windows: Task Manager → Performance → GPU
+   - macOS: Apple Silicon includes integrated GPU
+   - Linux: `lspci | grep -i vga`
+
+3. **Check Storage:**
+   - Ensure 50GB+ free space for models
+   - SSD recommended for best performance
+
+## Need Help?
+
+If you're unsure about compatibility:
+- Ask in [Discord #🆘|jan-help](https://discord.gg/FTk2MvZwJH)
+- Check [Troubleshooting](/help/troubleshooting) guide
+- Review [FAQ](/help/faq) for common questions

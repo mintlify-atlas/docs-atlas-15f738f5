@@ -1,0 +1,405 @@
+---
+title: Contributing to Jan
+description: Guide for contributing to Jan - an open-source AI assistant that runs 100% offline.
+---
+
+# Contributing to Jan
+
+Thank you for considering contributing to Jan. It's people like you that make Jan an amazing project for local AI.
+
+Jan is an AI assistant that runs 100% offline on your device. Think ChatGPT, but private, local, and under your complete control. If you're thinking about contributing, you're already awesome - let's make AI accessible to everyone, one commit at a time.
+
+## Quick Navigation
+
+<CardGroup cols={2}>
+  <Card title="Web App" icon="browser" href="#web-app-frontend">
+    React UI and user interface logic
+  </Card>
+  <Card title="Core SDK" icon="code" href="#core-sdk">
+    TypeScript SDK and extension system
+  </Card>
+  <Card title="Extensions" icon="puzzle-piece" href="#extensions">
+    Supportive modules for features
+  </Card>
+  <Card title="Tauri Backend" icon="server" href="#tauri-backend">
+    Rust native system integration
+  </Card>
+</CardGroup>
+
+## How Jan Works
+
+Jan is a desktop app that runs local AI models. Here's the architecture:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                   Web App (Frontend)                     │
+│                      (web-app/)                          │
+│  • React UI                                              │
+│  • Chat Interface                                        │
+│  • Settings Pages                                        │
+│  • Model Hub                                             │
+└────────────┬─────────────────────────────┬───────────────┘
+             │                             │
+             │ imports                     │ imports
+             ▼                             ▼
+  ┌──────────────────────┐      ┌──────────────────────┐
+  │     Core SDK         │      │     Extensions       │
+  │      (core/)         │      │   (extensions/)      │
+  │                      │      │                      │
+  │ • TypeScript APIs    │◄─────│ • Assistant Mgmt     │
+  │ • Extension System   │ uses │ • Conversations      │
+  │ • Event Bus          │      │ • Downloads          │
+  │ • Type Definitions   │      │ • LlamaCPP           │
+  └──────────┬───────────┘      └───────────┬──────────┘
+             │                              │
+             └──────────────┬───────────────┘
+                            │
+                            ▼
+                        Tauri IPC
+                    (invoke commands)
+                            │
+                            ▼
+┌───────────────────────────────────────────────────────────┐
+│                   Tauri Backend (Rust)                    │
+│                      (src-tauri/)                         │
+│                                                           │
+│  • Window Management        • File System Access          │
+│  • Process Control          • System Integration          │
+│  • IPC Command Handler      • Security & Permissions      │
+└───────────────────────────┬───────────────────────────────┘
+                            │
+                            ▼
+┌───────────────────────────────────────────────────────────┐
+│                   Tauri Plugins (Rust)                    │
+│                   (src-tauri/plugins/)                    │
+│                                                           │
+│     ┌──────────────────┐        ┌──────────────────┐      │
+│     │  Hardware Plugin │        │  LlamaCPP Plugin │      │
+│     │                  │        │                  │      │
+│     │ • CPU/GPU Info   │        │ • Process Mgmt   │      │
+│     │ • Memory Stats   │        │ • Model Loading  │      │
+│     │ • System Info    │        │ • Inference      │      │
+│     └──────────────────┘        └──────────────────┘      │
+└───────────────────────────────────────────────────────────┘
+```
+
+### Communication Flow
+
+1. **JavaScript Layer**: Web App imports Core SDK and Extensions as JavaScript modules
+2. **All → Backend**: Through Tauri IPC using `await invoke('command', data)`
+3. **Backend → Plugins**: Native Rust integration with direct function calls
+4. **Response Flow**: Plugin → Backend → IPC → Requester → UI updates
+
+### Real Example: Loading a Model
+
+When you click "Download Llama 3":
+
+1. **Web App** - User clicks download button
+2. **Download Extension** - Handles download logic
+3. **Tauri Backend** - Downloads file to disk
+4. **LlamaCPP Extension** - Prepares model for loading
+5. **LlamaCPP Plugin** - Starts llama.cpp process
+6. **Hardware Plugin** - Detects GPU, optimizes settings
+7. **Model ready!** - User can start chatting
+
+## Project Structure
+
+```
+jan/
+├── web-app/              # React frontend (what users see)
+├── src-tauri/            # Rust backend (system integration)
+│   ├── src/core/         # Core Tauri commands
+│   └── plugins/          # Tauri plugins (hardware, llamacpp)
+├── core/                 # TypeScript SDK (API layer)
+├── extensions/           # JavaScript extensions
+│   ├── assistant-extension/
+│   ├── conversational-extension/
+│   ├── download-extension/
+│   └── llamacpp-extension/
+├── docs/                 # Documentation website
+├── scripts/              # Build utilities
+├── package.json          # Root workspace configuration
+└── Makefile              # Build automation commands
+```
+
+## Development Setup
+
+### Prerequisites
+
+- **Node.js** ≥ 20.0.0
+- **Yarn** ≥ 1.22.0
+- **Rust** (for Tauri)
+- **Make** ≥ 3.81
+
+### The Easy Way
+
+```bash
+git clone https://github.com/janhq/jan
+cd jan
+make dev
+```
+
+See the [Build from Source guide](/resources/build-from-source) for detailed instructions.
+
+## How to Contribute
+
+### Reporting Bugs
+
+<Steps>
+  <Step title="Search existing issues">
+    Check [GitHub Issues](https://github.com/janhq/jan/issues) to avoid duplicates
+  </Step>
+  <Step title="Open a new issue">
+    If not found, [create a new issue](https://github.com/janhq/jan/issues/new)
+  </Step>
+  <Step title="Include details">
+    Provide:
+    - System specs (OS, RAM, GPU)
+    - Error logs
+    - Steps to reproduce
+    - Expected vs actual behavior
+  </Step>
+</Steps>
+
+### Suggesting Features
+
+1. Open a new issue with a clear title and description
+2. Explain why this enhancement would be useful
+3. Include mockups or examples if possible
+4. Tag it appropriately (enhancement, feature-request)
+
+### Code Contributions
+
+#### Choose Your Adventure
+
+<Tabs>
+  <Tab title="Frontend UI">
+    Work on `web-app/` for:
+    - React components
+    - Chat interface
+    - Settings pages
+    - UI/UX improvements
+  </Tab>
+  <Tab title="Core SDK">
+    Work on `core/` for:
+    - TypeScript APIs
+    - Extension system
+    - Type definitions
+    - Event bus
+  </Tab>
+  <Tab title="Extensions">
+    Work on `extensions/` for:
+    - Assistant management
+    - Conversation handling
+    - Download logic
+    - Model integration
+  </Tab>
+  <Tab title="Backend">
+    Work on `src-tauri/` for:
+    - Rust backend
+    - System integration
+    - IPC commands
+    - Native plugins
+  </Tab>
+</Tabs>
+
+#### The Process
+
+<Steps>
+  <Step title="Fork the repository">
+    Create your own fork of the Jan repository
+  </Step>
+  <Step title="Create a branch">
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
+    Use prefixes:
+    - `feature/` for new features
+    - `fix/` for bug fixes
+    - `docs/` for documentation
+  </Step>
+  <Step title="Make your changes">
+    - Write clean, documented code
+    - Follow code standards (see below)
+    - Add tests for new functionality
+  </Step>
+  <Step title="Commit your changes">
+    ```bash
+    git commit -am 'feat: add support for Qwen models'
+    ```
+    Follow [commit conventions](#commit-messages)
+  </Step>
+  <Step title="Push to your fork">
+    ```bash
+    git push origin feature/your-feature-name
+    ```
+  </Step>
+  <Step title="Open a Pull Request">
+    - Target the `dev` branch (not `main`)
+    - Provide a clear description
+    - Reference related issues
+    - Wait for review
+  </Step>
+</Steps>
+
+## Code Standards
+
+### TypeScript/JavaScript
+
+- **TypeScript required** - No plain JavaScript for new code
+- **ESLint + Prettier** - Run `yarn lint` before committing
+- **Functional components** - Use React hooks, not class components
+- **No `any` types** - Proper typing is required
+
+```typescript
+// Good
+function processModel(model: Model): Promise<Result> {
+  return api.process(model);
+}
+
+// Bad
+function processModel(model: any): any {
+  return api.process(model);
+}
+```
+
+### Rust
+
+- **Format code** - Run `cargo fmt` before committing
+- **Clippy checks** - Run `cargo clippy` and fix warnings
+- **Error handling** - Use `Result<T, E>` pattern
+- **Documentation** - Document all public APIs
+
+```rust
+// Good
+pub fn load_model(path: &Path) -> Result<Model, LoadError> {
+    // Implementation
+}
+
+// Bad
+pub fn load_model(path: &Path) -> Model {
+    // Implementation that might panic
+}
+```
+
+## Git Conventions
+
+### Branches
+
+- `main` - Stable releases only
+- `dev` - Development branch (target this for PRs)
+- `feature/*` - New features
+- `fix/*` - Bug fixes
+- `docs/*` - Documentation updates
+
+### Commit Messages
+
+Use conventional commits format:
+
+```
+type(scope): subject
+
+body (optional)
+
+footer (optional)
+```
+
+**Types:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation only
+- `style:` - Code style changes (formatting)
+- `refactor:` - Code refactoring
+- `test:` - Adding tests
+- `chore:` - Maintenance tasks
+
+**Examples:**
+
+```bash
+feat: add support for Qwen models
+fix: resolve memory leak in model loading
+docs: update installation instructions
+refactor: simplify extension loading logic
+```
+
+## Testing
+
+### Run Tests
+
+```bash
+yarn test                    # All TypeScript tests
+cd src-tauri && cargo test  # Rust tests
+cd autoqa && python main.py # End-to-end tests
+```
+
+### Write Tests
+
+- Add tests for all new features
+- Ensure existing tests pass
+- Aim for high code coverage
+
+## Troubleshooting
+
+### Common Issues
+
+<AccordionGroup>
+  <Accordion title="Build failures">
+    Check versions:
+    ```bash
+    node --version   # ≥ 20.0.0
+    yarn --version   # ≥ 1.22.0
+    rustc --version  # should be installed
+    ```
+    
+    Clean and rebuild:
+    ```bash
+    make clean
+    make dev
+    ```
+  </Accordion>
+  
+  <Accordion title="Extension not loading">
+    Verify it's properly registered and built:
+    ```bash
+    ls -la pre-install/*.tgz
+    yarn build:extensions
+    ```
+  </Accordion>
+  
+  <Accordion title="Model not working">
+    - Check hardware requirements
+    - Verify GPU drivers are up to date
+    - Check system memory availability
+  </Accordion>
+</AccordionGroup>
+
+### Get Help
+
+1. Check [troubleshooting docs](https://jan.ai/docs/desktop/troubleshooting)
+2. Ask in [Discord](https://discord.gg/FTk2MvZwJH) `#🆘|jan-help`
+3. Search [GitHub Issues](https://github.com/janhq/jan/issues)
+4. Post in [GitHub Discussions](https://github.com/janhq/jan/discussions)
+
+## Component-Specific Guides
+
+For detailed contribution guides:
+
+- **[Web App](https://github.com/janhq/jan/blob/main/web-app/CONTRIBUTING.md)** - React UI
+- **[Core SDK](https://github.com/janhq/jan/blob/main/core/CONTRIBUTING.md)** - TypeScript SDK
+- **[Extensions](https://github.com/janhq/jan/blob/main/extensions/CONTRIBUTING.md)** - Extension modules
+- **[Tauri Backend](https://github.com/janhq/jan/blob/main/src-tauri/CONTRIBUTING.md)** - Rust backend
+- **[Tauri Plugins](https://github.com/janhq/jan/blob/main/src-tauri/plugins/CONTRIBUTING.md)** - Hardware plugins
+
+## License
+
+Apache 2.0 - By contributing, you agree that your contributions will be licensed under the Apache 2.0 License. See [LICENSE](https://github.com/janhq/jan/blob/main/LICENSE) for details.
+
+## Thank You
+
+We're building something special - an AI assistant that respects your privacy and runs entirely on your machine. Every contribution, no matter how small, helps make AI more accessible to everyone.
+
+Thanks for being part of the journey. Let's build the future of local AI together!
+
+<Card title="Build from Source" icon="hammer" href="/resources/build-from-source">
+  Ready to start? Learn how to build Jan from source
+</Card>

@@ -1,0 +1,169 @@
+---
+title: CLI Overview
+description: Run Jan from the command line to serve models and launch AI agents
+---
+
+## Introduction
+
+Jan's CLI enables you to run local AI models from the command line and wire them to AI coding agents like Claude Code or OpenCode — no cloud required.
+
+The CLI shares all core logic with the Jan desktop app, so models downloaded in the desktop app are automatically available in the CLI.
+
+<CodeGroup>
+```bash Terminal
+jan serve qwen3.5-35b-a3b              # Expose a model at localhost:6767/v1
+jan launch claude --model qwen3.5-35b  # Start model + launch Claude Code
+jan models list                        # Show all installed models
+```
+</CodeGroup>
+
+## Key Features
+
+- **OpenAI-Compatible API**: Serves models via an OpenAI-compatible endpoint
+- **Auto-Detection**: Automatically detects LlamaCPP or MLX engines
+- **Agent Integration**: Pre-wires environment variables for Claude Code, Codex, and OpenClaw
+- **HuggingFace Downloads**: Auto-download models from HuggingFace repos
+- **Background Mode**: Run models in detached mode with `--detach`
+- **Context Auto-Fit**: Maximize context window based on available VRAM
+
+## Installation
+
+The Jan CLI is included with the Jan desktop application. Build it from source:
+
+```bash
+cargo build --features cli --bin jan
+```
+
+The binary will be located at `target/release/jan-cli` (or `target/debug/jan-cli` for debug builds).
+
+## Quick Start
+
+### Serve a Model
+
+Start a local model server:
+
+```bash
+jan serve qwen3.5-35b-a3b
+```
+
+<ResponseField name="Output">
+```
+✓ qwen3.5-35b-a3b ready · http://127.0.0.1:6767
+
+  Endpoint  http://127.0.0.1:6767/v1
+
+  Press Ctrl+C to stop.
+```
+</ResponseField>
+
+### Launch an AI Agent
+
+Start a model and automatically launch Claude Code with pre-configured environment variables:
+
+```bash
+jan launch claude --model qwen3.5-35b-a3b
+```
+
+The CLI will:
+1. Load the specified model
+2. Set environment variables (OPENAI_BASE_URL, ANTHROPIC_BASE_URL, etc.)
+3. Launch Claude Code with the local model pre-wired
+
+### List Available Models
+
+View all models installed in your Jan data folder:
+
+```bash
+jan models list
+```
+
+<ResponseField name="Output" type="JSON">
+```json
+[
+  {
+    "id": "qwen3.5-35b-a3b",
+    "engine": "llamacpp",
+    "name": "Qwen 3.5 35B",
+    "model_path": "/path/to/model.gguf",
+    "size_bytes": 21474836480,
+    "embedding": false,
+    "capabilities": ["text"],
+    "mmproj_path": null
+  }
+]
+```
+</ResponseField>
+
+## Architecture
+
+### Data Folder
+
+Jan stores models, threads, and configuration in a platform-specific data folder:
+
+- **macOS**: `~/Library/Application Support/Jan`
+- **Linux**: `~/.config/Jan`
+- **Windows**: `%APPDATA%\Jan`
+
+View your data folder location:
+
+```bash
+jan app data-folder
+```
+
+### Engine Auto-Detection
+
+Jan automatically detects the appropriate inference engine:
+
+- **LlamaCPP**: For GGUF models (most common)
+- **MLX**: For MLX models on macOS/Apple Silicon
+
+The engine is determined from the model's `model.yml` file in the data folder.
+
+### Binary Discovery
+
+Jan auto-discovers inference binaries from the Jan app installation:
+
+- **llama-server**: Found in Jan's app bundle or data folder
+- **mlx-server**: Found in Jan.app on macOS
+
+You can override with `--bin <path>` if needed.
+
+## Environment Variables
+
+### HuggingFace Authentication
+
+Set a HuggingFace token to download private/gated models:
+
+```bash
+export HF_TOKEN="your_token_here"
+# or
+export HUGGING_FACE_HUB_TOKEN="your_token_here"
+```
+
+### Logging
+
+Enable verbose logging:
+
+```bash
+jan serve qwen3.5-35b --verbose
+```
+
+Or set the log level via environment variable:
+
+```bash
+RUST_LOG=info jan serve qwen3.5-35b
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Commands Reference" icon="terminal" href="/cli/commands">
+    Complete reference for all CLI commands
+  </Card>
+  <Card title="Serve Command" icon="server" href="/cli/serve">
+    Detailed guide for serving models
+  </Card>
+  <Card title="Launch Command" icon="rocket" href="/cli/launch">
+    Wire AI agents to local models
+  </Card>
+</CardGroup>

@@ -1,0 +1,493 @@
+---
+title: Building and Packaging
+description: Learn how to build, test, and distribute Jan extensions
+---
+
+This guide covers the complete process of building, testing, and packaging your Jan extension for distribution.
+
+## Project Structure
+
+A typical Jan extension project structure:
+
+```
+my-extension/
+├── src/
+│   └── index.ts          # Main extension code
+├── dist/                 # Compiled output (generated)
+│   └── index.js
+├── package.json          # Package metadata
+├── tsconfig.json         # TypeScript configuration
+├── rolldown.config.mjs   # Build configuration
+└── README.md             # Extension documentation
+```
+
+## Configuration Files
+
+### package.json
+
+```json package.json
+{
+  "name": "@myorg/my-extension",
+  "productName": "My Extension",
+  "version": "1.0.0",
+  "description": "My Jan extension",
+  "main": "dist/index.js",
+  "author": "Your Name <you@example.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "rolldown -c rolldown.config.mjs",
+    "build:publish": "rimraf *.tgz --glob || true && yarn build && npm pack && cpx *.tgz ../../pre-install"
+  },
+  "dependencies": {
+    "@janhq/core": "latest"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0",
+    "rimraf": "6.0.1",
+    "rolldown": "1.0.0-beta.1",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/*",
+    "package.json",
+    "README.md"
+  ],
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  }
+}
+```
+
+<Note>
+The `productName` field is displayed in Jan's UI. The `name` field is used internally.
+</Note>
+
+### tsconfig.json
+
+```json tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+### rolldown.config.mjs
+
+```javascript rolldown.config.mjs
+import { defineConfig } from 'rolldown'
+
+export default defineConfig({
+  input: 'src/index.ts',
+  output: {
+    dir: 'dist',
+    format: 'cjs',
+    entryFileNames: 'index.js'
+  },
+  external: ['@janhq/core'],
+  resolve: {
+    extensions: ['.ts', '.js']
+  }
+})
+```
+
+## Building Your Extension
+
+### Development Build
+
+For development, use the build command with watch mode:
+
+```bash
+yarn build --watch
+```
+
+This rebuilds automatically when you modify source files.
+
+### Production Build
+
+For production, create an optimized build:
+
+```bash
+yarn build
+```
+
+### Verify Build Output
+
+Check that `dist/index.js` was created:
+
+```bash
+ls -la dist/
+```
+
+You should see:
+```
+dist/
+├── index.js          # Main bundle
+├── index.d.ts        # Type definitions
+└── index.js.map      # Source map
+```
+
+## Testing Your Extension
+
+### Local Testing
+
+1. Build your extension:
+   ```bash
+   yarn build
+   ```
+
+2. Create a test package:
+   ```bash
+   npm pack
+   ```
+
+3. Install in Jan:
+   - Open Jan > Settings > Extensions
+   - Click Manual Installation
+   - Select your `.tgz` file
+
+4. Enable Developer Tools:
+   - Go to Help > Toggle Developer Tools
+   - Check Console for logs and errors
+
+### Debugging
+
+Add console logs throughout your extension:
+
+```typescript
+export default class MyExtension extends BaseExtension {
+  async onLoad(): Promise<void> {
+    console.log('[MyExtension] Loading...')
+
+    try {
+      // Your initialization code
+      console.log('[MyExtension] Initialized successfully')
+    } catch (error) {
+      console.error('[MyExtension] Failed to initialize:', error)
+    }
+  }
+}
+```
+
+### Test Event Handling
+
+```typescript
+import { events, MessageEvent } from '@janhq/core'
+
+events.on(MessageEvent.OnMessageSent, (data) => {
+  console.log('[MyExtension] Message sent event:', data)
+})
+```
+
+Send a message in Jan and check the console for your logs.
+
+## Packaging for Distribution
+
+### Create Package
+
+Run the publish script:
+
+```bash
+yarn build:publish
+```
+
+This creates a file like `myorg-my-extension-1.0.0.tgz` in your project root.
+
+### Package Contents
+
+Your package includes:
+- `dist/` - Compiled JavaScript
+- `package.json` - Package metadata
+- `README.md` - Documentation
+
+To verify contents:
+
+```bash
+tar -tzf myorg-my-extension-1.0.0.tgz
+```
+
+## Version Management
+
+### Semantic Versioning
+
+Follow [semver](https://semver.org/) for version numbers:
+
+- **MAJOR** (1.0.0): Breaking changes
+- **MINOR** (1.1.0): New features, backward compatible
+- **PATCH** (1.0.1): Bug fixes, backward compatible
+
+### Update Version
+
+Update version in `package.json`:
+
+```json
+{
+  "version": "1.1.0"
+}
+```
+
+Or use npm:
+
+```bash
+npm version minor  # 1.0.0 -> 1.1.0
+npm version patch  # 1.1.0 -> 1.1.1
+npm version major  # 1.1.1 -> 2.0.0
+```
+
+## Distribution
+
+### Share Your Extension
+
+1. **GitHub Releases**: Upload `.tgz` to GitHub releases
+2. **npm Registry**: Publish to npm (if public)
+3. **Direct Distribution**: Share `.tgz` file directly
+
+### npm Publishing
+
+To publish to npm:
+
+```bash
+# Login to npm
+npm login
+
+# Publish package
+npm publish --access public
+```
+
+Users can then install with:
+
+```bash
+npm install @myorg/my-extension
+```
+
+### GitHub Release
+
+1. Create a Git tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+2. Create GitHub release:
+   - Go to your repository's Releases
+   - Click "Create a new release"
+   - Select your tag
+   - Upload your `.tgz` file
+   - Add release notes
+
+## Example: Complete Build Script
+
+Add to `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "rolldown -c rolldown.config.mjs --watch",
+    "build": "rolldown -c rolldown.config.mjs",
+    "clean": "rimraf dist *.tgz",
+    "pack": "npm pack",
+    "prepublish": "yarn clean && yarn build",
+    "build:publish": "yarn prepublish && yarn pack",
+    "test": "echo \"No tests yet\" && exit 0"
+  }
+}
+```
+
+Workflow:
+
+```bash
+# Development
+yarn dev              # Watch mode for development
+
+# Production
+yarn build:publish    # Clean, build, and package
+```
+
+## Real-World Example: Conversational Extension
+
+Here's the complete build configuration from Jan's built-in conversational extension:
+
+```json package.json
+{
+  "name": "@janhq/conversational-extension",
+  "productName": "Conversational",
+  "version": "1.0.0",
+  "description": "Enables conversations and state persistence via your file system.",
+  "main": "dist/index.js",
+  "author": "Jan <service@jan.ai>",
+  "license": "MIT",
+  "scripts": {
+    "build": "rolldown -c rolldown.config.mjs",
+    "build:publish": "rimraf *.tgz --glob || true && yarn build && npm pack && cpx *.tgz ../../pre-install"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./main": "./dist/module.js"
+  },
+  "devDependencies": {
+    "cpx": "1.5.0",
+    "rimraf": "6.0.1",
+    "rolldown": "1.0.0-beta.1",
+    "ts-loader": "^9.5.0",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@janhq/core": "../../core/package.tgz"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/*",
+    "package.json",
+    "README.md"
+  ],
+  "bundleDependencies": [],
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  },
+  "packageManager": "yarn@4.5.3"
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use TypeScript">
+    TypeScript provides type safety and better IDE support. All Jan core APIs are fully typed.
+  </Accordion>
+
+  <Accordion title="Keep bundle size small">
+    - Use external dependencies when possible
+    - Avoid large libraries
+    - Tree-shake unused code
+  </Accordion>
+
+  <Accordion title="Handle errors gracefully">
+    ```typescript
+    async onLoad(): Promise<void> {
+      try {
+        // Your code
+      } catch (error) {
+        console.error('Extension failed to load:', error)
+        // Don't throw - allow Jan to continue
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Clean up resources">
+    ```typescript
+    onUnload(): void {
+      // Remove event listeners
+      events.off(MessageEvent.OnMessageSent, this.handler)
+      
+      // Close connections
+      this.connection?.close()
+      
+      // Clear timers
+      clearInterval(this.interval)
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Version your APIs">
+    If your extension exposes APIs, version them:
+    ```typescript
+    export const API_VERSION = '1.0.0'
+    ```
+  </Accordion>
+
+  <Accordion title="Document your extension">
+    Include a comprehensive README.md with:
+    - Installation instructions
+    - Configuration options
+    - Usage examples
+    - Changelog
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Build fails with module errors">
+    Ensure all dependencies are installed:
+    ```bash
+    rm -rf node_modules
+    yarn install
+    ```
+  </Accordion>
+
+  <Accordion title="Extension doesn't load in Jan">
+    Check:
+    - `package.json` has correct `main` field
+    - `dist/index.js` exists
+    - No syntax errors in console
+    - Extension is enabled in Jan settings
+  </Accordion>
+
+  <Accordion title="Types not working">
+    Install type definitions:
+    ```bash
+    yarn add -D @types/node
+    ```
+    
+    Update `tsconfig.json`:
+    ```json
+    {
+      "compilerOptions": {
+        "types": ["node"]
+      }
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Package is too large">
+    Exclude unnecessary files in `package.json`:
+    ```json
+    {
+      "files": [
+        "dist/*",
+        "package.json",
+        "README.md"
+      ]
+    }
+    ```
+    
+    Avoid bundling `node_modules` by marking dependencies as external.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Core API" icon="code" href="/extensions/core-api">
+    Explore the complete API reference
+  </Card>
+  <Card title="Examples" icon="github" href="https://github.com/janhq/jan/tree/main/extensions">
+    View real extension examples
+  </Card>
+  <Card title="Extension Template" icon="template" href="https://github.com/janhq/extension-template">
+    Start from the official template
+  </Card>
+  <Card title="Community" icon="discord" href="https://discord.gg/jan">
+    Join the Jan community
+  </Card>
+</CardGroup>

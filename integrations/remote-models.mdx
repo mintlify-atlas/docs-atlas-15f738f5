@@ -1,0 +1,239 @@
+---
+title: Remote Models
+description: Connect Jan to cloud-based AI models from OpenAI, Anthropic, Google, Groq, and other providers.
+icon: "cloud"
+---
+
+Jan supports integrating with remote AI models from various providers, allowing you to use powerful cloud models through Jan's interface while maintaining a unified experience with your local models.
+
+## Supported Providers
+
+Jan integrates with the following remote model providers:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI" icon="openai">
+    GPT-4o, o3, and other OpenAI models
+  </Card>
+  <Card title="Anthropic" icon="message-bot">
+    Claude Opus, Sonnet, and Haiku models
+  </Card>
+  <Card title="Google" icon="google">
+    Gemini 1.5 and 2.0 series models
+  </Card>
+  <Card title="Groq" icon="bolt">
+    High-performance LLM inference
+  </Card>
+  <Card title="OpenRouter" icon="route">
+    Unified access to multiple providers
+  </Card>
+  <Card title="Others" icon="ellipsis">
+    Cohere, Mistral AI, HuggingFace, and more
+  </Card>
+</CardGroup>
+
+## General Setup Process
+
+The setup process is similar across all providers:
+
+<Steps>
+  <Step title="Get Your API Key">
+    Visit your chosen provider's website and create an API key:
+    - [OpenAI Platform](https://platform.openai.com/api-keys)
+    - [Anthropic Console](https://console.anthropic.com/settings/keys)
+    - [Google AI Studio](https://aistudio.google.com/app/apikey)
+    - [Groq Console](https://console.groq.com/keys)
+    - [OpenRouter](https://openrouter.ai/keys)
+
+    <Note>
+    Ensure your API key has sufficient credits and access to the models you want to use.
+    </Note>
+  </Step>
+
+  <Step title="Configure Jan">
+    1. Navigate to the **Settings** page in Jan
+    2. Under **Model Providers**, select your provider
+    3. Insert your **API Key**
+    4. Click **Save** or **Apply**
+  </Step>
+
+  <Step title="Start Using Remote Models">
+    1. Open any existing chat or create a new one
+    2. Select a remote model from the model selector
+    3. Start chatting - Jan will route your requests to the remote provider
+  </Step>
+</Steps>
+
+## OpenAI Integration
+
+Jan supports all OpenAI models, including GPT-4o, o3, and custom fine-tuned models.
+
+### Configuration Example
+
+```bash
+# Test your OpenAI integration
+curl https://api.openai.com/v1/models \
+  -H "Authorization: Bearer YOUR_OPENAI_API_KEY"
+```
+
+### Available Models
+
+Jan automatically includes popular OpenAI models. To use a specific model:
+- See the list of available models in [OpenAI Platform](https://platform.openai.com/docs/models/overview)
+- The model ID must match exactly (e.g., `gpt-4o`, `gpt-4-turbo`)
+
+## Anthropic Integration
+
+Access Claude's Opus, Sonnet, and Haiku models through Jan.
+
+### Available Models
+
+- **Claude Opus 4**: `claude-opus-4@20250514`
+- **Claude Sonnet 4**: `claude-sonnet-4@20250514`
+- **Claude 3.5 Haiku**: `claude-3-5-haiku@20241022`
+
+See the complete list in [Anthropic's documentation](https://docs.anthropic.com/claude/docs/models-overview).
+
+## Google (Gemini) Integration
+
+Use Google's Gemini models for multimodal AI capabilities.
+
+### Available Models
+
+- **Gemini 1.5 Pro**: `gemini-1.5-pro`
+- **Gemini 2.0 Flash**: `gemini-2.0-flash-lite-preview`
+
+Check [Google's models page](https://ai.google.dev/gemini-api/docs/models/gemini) for the latest available models.
+
+## Groq Integration
+
+Groq provides high-performance inference for open-source models.
+
+### Available Models
+
+- **Llama 3.3 70B**: `llama-3.3-70b-versatile`
+- **Mixtral**: Various Mixtral models
+- **Llama 2**: LLaMA 2 series models
+
+See the full list in [Groq's documentation](https://console.groq.com/docs/models).
+
+## OpenRouter Integration
+
+OpenRouter provides unified access to multiple AI model providers through a single API.
+
+### Why Use OpenRouter?
+
+- Access models from Anthropic, Google, Meta, and more with one API key
+- Competitive pricing across providers
+- Several free models available
+- Simplified billing and management
+
+### Model Format
+
+OpenRouter uses the format: `organization/model-name`
+
+**Examples:**
+- Claude 4 Opus: `anthropic/claude-opus-4`
+- Google Gemini 2.5 Pro: `google/gemini-2.5-pro-preview`
+- DeepSeek R1: `deepseek/deepseek-r1-0528`
+
+Browse all available models at [OpenRouter's Model Reference](https://openrouter.ai/models).
+
+## Adding Custom Models
+
+If you want to use a specific remote model that isn't listed in Jan:
+
+<Steps>
+  <Step title="Find the Model ID">
+    Check your provider's documentation for the exact model identifier
+  </Step>
+
+  <Step title="Add the Model">
+    Follow the instructions in Jan's [Add Cloud Models guide](/desktop/models#add-models-1)
+  </Step>
+
+  <Step title="Configure Model Settings">
+    Set the `id` property to match the provider's model name exactly
+  </Step>
+</Steps>
+
+## Architecture Overview
+
+Jan's remote model integration is built on a clean architecture:
+
+```typescript
+// RemoteOAIEngine handles authentication and headers
+abstract class RemoteOAIEngine extends OAIEngine {
+  apiKey?: string
+  
+  override async headers(): Promise<HeadersInit> {
+    return {
+      ...(this.apiKey && {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'api-key': `${this.apiKey}`,
+      }),
+    }
+  }
+}
+```
+
+This architecture ensures:
+- Consistent authentication across providers
+- Easy integration of new providers
+- Unified interface for local and remote models
+
+## Troubleshooting
+
+### API Key Issues
+
+- Verify your API key is correct and not expired
+- Check if you have billing set up on your provider account
+- Ensure you have access to the model you're trying to use
+
+### Connection Problems
+
+- Check your internet connection
+- Verify the provider's system status
+- Look for error messages in [Jan's logs](/desktop/troubleshooting#how-to-get-error-logs)
+
+### Model Unavailable
+
+- Confirm your API key has access to the model
+- Check if you're using the correct model ID
+- Verify your account has the necessary permissions
+- Some models may have regional restrictions
+
+### Rate Limits
+
+- Most providers implement rate limits
+- Check your provider's dashboard for current usage
+- Consider upgrading your plan for higher limits
+
+<Warning>
+Remote model requests consume API credits and require an internet connection. Be mindful of usage costs and privacy considerations when using cloud-based models.
+</Warning>
+
+## Best Practices
+
+1. **API Key Security**
+   - Never share your API keys
+   - Store keys securely in Jan's settings
+   - Rotate keys periodically
+
+2. **Cost Management**
+   - Monitor your usage through provider dashboards
+   - Set up billing alerts
+   - Use local models for development and testing
+
+3. **Privacy Considerations**
+   - Be aware that remote models process data in the cloud
+   - Use local models for sensitive information
+   - Review each provider's data retention policies
+
+4. **Performance Optimization**
+   - Use streaming for better user experience
+   - Select appropriate models for your use case
+   - Consider latency when choosing providers
+
+## Need Help?
+
+Join our [Discord community](https://discord.gg/FTk2MvZwJH) for support and to connect with other Jan users working with remote models.

@@ -1,122 +1,131 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Jan",
+  "theme": "almond",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#3B82F6",
+    "light": "#60A5FA",
+    "dark": "#2563EB"
   },
-  "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/janhq/jan"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/janhq/jan",
+      "discord": "https://discord.gg/FTk2MvZwJH"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Get Started",
             "pages": [
-              "index",
+              "introduction",
               "quickstart",
-              "development"
+              "installation"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Desktop App",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "desktop/overview",
+              "desktop/chat-interface",
+              "desktop/assistants",
+              "desktop/models",
+              "desktop/settings",
+              "desktop/data-folder"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Features",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "features/local-models",
+              "features/cloud-integration",
+              "features/api-server",
+              "features/mcp-integration",
+              "features/model-parameters"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Integrations",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "integrations/openai-compatible",
+              "integrations/remote-models",
+              "integrations/mcp-servers"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Developers",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "CLI",
             "pages": [
-              "api-reference/introduction"
+              "cli/overview",
+              "cli/commands",
+              "cli/serve",
+              "cli/launch"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Extensions",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "extensions/overview",
+              "extensions/getting-started",
+              "extensions/core-api",
+              "extensions/building-extensions"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/overview",
+              "api/chat-completions",
+              "api/models",
+              "api/embeddings"
+            ]
+          },
+          {
+            "group": "Core Library",
+            "pages": [
+              "core/overview",
+              "core/types",
+              "core/events",
+              "core/extensions"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Help",
+        "groups": [
+          {
+            "group": "Support",
+            "pages": [
+              "help/troubleshooting",
+              "help/faq",
+              "help/system-requirements",
+              "help/community"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/build-from-source",
+              "resources/contributing",
+              "resources/changelog"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

@@ -1,0 +1,450 @@
+---
+title: "Settings & Configuration"
+description: "Configure Jan desktop app to match your preferences and optimize performance"
+---
+
+## Accessing Settings
+
+Open Settings in any of these ways:
+
+- Click the **Settings** icon in the sidebar
+- Press **Cmd/Ctrl + ,** (keyboard shortcut)
+- Click your profile in the bottom-left corner
+
+## General Settings
+
+### Appearance
+
+#### Theme
+Choose your preferred color scheme:
+
+- **Light** - Light background and dark text
+- **Dark** - Dark background and light text
+- **System** - Match your operating system theme
+
+#### Font Size
+Adjust text size for better readability:
+
+- **Small** - Compact interface
+- **Medium** - Default size
+- **Large** - Easier reading
+
+#### Language
+Select your interface language:
+
+- English
+- Additional languages available
+
+Changes apply immediately.
+
+### Chat Preferences
+
+#### Spell Check in Chat Input
+Enable/disable spell checking while typing messages.
+
+- **On** - Underline misspelled words
+- **Off** - No spell checking
+
+<Info>
+Spell check is provided by your operating system's built-in checker.
+</Info>
+
+#### Token Counter Display
+Choose how to display token usage:
+
+- **Compact** - Small indicator showing only essential info
+- **Detailed** - Full breakdown of tokens and speed
+
+Shows:
+- Current context usage
+- Generation speed (tokens/second)
+- Total tokens vs. model capacity
+
+### RAG (Retrieval Augmented Generation)
+
+#### Enable Attachments
+Turn document attachment features on or off.
+
+- **Enabled** - Can attach and process documents
+- **Disabled** - Document features hidden
+
+#### Parse Mode
+How Jan processes attached documents:
+
+- **Prompt** - Ask each time how to process documents
+- **Auto** - Automatically choose based on size and context
+- **Inline** - Always insert content directly into prompts
+- **Embeddings** - Always use vector database for semantic search
+
+#### Max File Size
+Maximum document size for attachments (in MB).
+
+- Default: 10 MB
+- Range: 1-100 MB
+
+#### Auto Inline Context Ratio
+When using Auto parse mode, documents smaller than this ratio of the model's context length will be inlined.
+
+- Default: 0.75 (75%)
+- Range: 0.1-1.0
+
+## Models
+
+Manage your downloaded and available AI models.
+
+### Downloaded Models
+
+View all models currently on your system:
+
+- Model name and version
+- Size and quantization
+- Capabilities (text, vision, tools)
+- Actions: Edit settings, Delete
+
+### Model Hub
+
+Browse and download models:
+
+- Filter by capability, size, provider
+- View model details and requirements
+- Download with progress tracking
+- Import models from Hugging Face or local files
+
+<Card
+  title="Learn More About Models"
+  icon="brain"
+  href="/desktop/models"
+>
+  Complete guide to downloading and configuring models.
+</Card>
+
+## Assistants
+
+Create and manage custom AI assistants.
+
+### Your Assistants
+
+List of all your custom assistants:
+
+- Name and avatar
+- Description
+- Edit or delete assistants
+
+### Creating Assistants
+
+Click **Add Assistant** to create a new one:
+
+1. Set name and avatar
+2. Write instructions
+3. Configure parameters
+4. Save
+
+<Card
+  title="Assistant Guide"
+  icon="robot"
+  href="/desktop/assistants"
+>
+  Learn how to create effective assistants.
+</Card>
+
+## Providers
+
+Manage AI model providers and endpoints.
+
+### LlamaCpp (Built-in)
+
+Jan's default local inference engine:
+
+- **Status** - Active/Inactive
+- **Server Address** - Local endpoint
+- **Port** - Network port (default: varies)
+
+### External Providers
+
+Add API-based providers:
+
+1. Click **Add Provider**
+2. Enter provider details:
+   - Name
+   - API base URL
+   - API key (if required)
+   - Model mappings
+3. Test connection
+4. Save
+
+Supported provider types:
+- OpenAI-compatible APIs
+- Custom endpoints
+
+### Provider Settings
+
+For each provider, configure:
+
+- **Timeout** - Request timeout duration
+- **Proxy** - Proxy server settings (if needed)
+- **TLS** - Certificate validation options
+
+## Advanced Settings
+
+### Jan Data Folder
+
+Location where Jan stores all its data:
+
+- Downloaded models
+- Conversation history
+- Attachments and embeddings
+- Configuration files
+- MCP servers
+
+#### Viewing Location
+
+Click **Open Folder** to view in file explorer.
+
+#### Changing Location
+
+1. Click **Change**
+2. Select new folder location
+3. Choose to move or copy existing data
+4. Restart Jan
+
+<Warning>
+Ensure the new location has sufficient storage space. Moving large models may take time.
+</Warning>
+
+<Card
+  title="Data Folder Structure"
+  icon="folder-tree"
+  href="/desktop/data-folder"
+>
+  Learn about Jan's file organization.
+</Card>
+
+### Factory Reset
+
+Reset Jan to default state:
+
+1. Go to **Settings > Advanced**
+2. Click **Factory Reset**
+3. Choose what to reset:
+   - Delete all threads
+   - Delete all models
+   - Reset all settings
+4. Confirm reset
+
+<Warning>
+Factory reset is permanent and cannot be undone. Export any important conversations first.
+</Warning>
+
+### Server Settings
+
+#### Host
+Network interface for local server:
+
+- **127.0.0.1** - Localhost only (default, most secure)
+- **0.0.0.0** - All network interfaces (for remote access)
+
+<Warning>
+Exposing Jan on all interfaces allows network access. Only use on trusted networks with proper firewall rules.
+</Warning>
+
+#### Port
+Network port for the local API server.
+
+- Default: Auto-assigned
+- Custom: 1024-65535
+
+#### CORS Settings
+
+Configure Cross-Origin Resource Sharing:
+
+- **Allowed Origins** - Domains that can access the API
+- **Trusted Hosts** - Whitelist for remote connections
+
+## Remote Access Settings
+
+Configure remote access to Jan:
+
+### Tailscale Integration
+
+Connect Jan to your Tailscale network:
+
+1. Go to **Settings > Remote Access**
+2. Click **Setup Tailscale**
+3. Authenticate with Tailscale
+4. Enable remote access
+5. Share your Tailscale URL
+
+<Info>
+Tailscale provides secure, encrypted access to Jan from anywhere without port forwarding.
+</Info>
+
+### Telegram Integration
+
+Chat with Jan through Telegram:
+
+1. Go to **Settings > Remote Access**
+2. Click **Setup Telegram Bot**
+3. Enter your Telegram Bot token
+4. Select which model to use
+5. Start chatting in Telegram
+
+### WhatsApp Integration
+
+Chat with Jan through WhatsApp:
+
+1. Go to **Settings > Remote Access**
+2. Click **Setup WhatsApp**
+3. Scan QR code with WhatsApp
+4. Configure settings
+5. Start chatting
+
+## MCP Servers
+
+Manage Model Context Protocol servers.
+
+### What are MCP Servers?
+
+MCP servers provide external tools and data sources:
+
+- File system access
+- Database connections
+- API integrations
+- Custom functions
+
+### Adding MCP Servers
+
+1. Go to **Settings > MCP Servers**
+2. Click **Add Server**
+3. Choose configuration method:
+   - **From Registry** - Pre-configured servers
+   - **Manual** - Custom server configuration
+4. Configure server settings:
+   - Name
+   - Command or URL
+   - Arguments
+   - Environment variables
+5. Save and enable
+
+<CodeGroup>
+```json Example: Filesystem MCP
+{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"],
+  "env": {}
+}
+```
+
+```json Example: GitHub MCP
+{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "your_token_here"
+  }
+}
+```
+</CodeGroup>
+
+### Managing Servers
+
+For each MCP server:
+
+- **Enable/Disable** - Toggle server availability
+- **Edit** - Modify configuration
+- **Delete** - Remove server
+- **View Logs** - Check server output and errors
+
+## Keyboard Shortcuts
+
+View and learn all keyboard shortcuts:
+
+### Application
+- New chat: **Cmd/Ctrl + N**
+- New project: **Cmd/Ctrl + Shift + N**
+- Toggle sidebar: **Cmd/Ctrl + B**
+- Zoom in: **Cmd/Ctrl + =**
+- Zoom out: **Cmd/Ctrl + -**
+
+### Chat
+- Send message: **Enter**
+- New line: **Shift + Enter**
+
+### Navigation
+- Search: **Cmd/Ctrl + K**
+- Settings: **Cmd/Ctrl + ,**
+
+<Card
+  title="View All Shortcuts"
+  icon="keyboard"
+  href="/desktop/settings"
+>
+  Go to Settings > Shortcuts for the complete list.
+</Card>
+
+## Updates
+
+### Auto-Update
+
+Jan automatically checks for updates:
+
+- **Notification** - Alert when new version available
+- **Download** - Updates download in background
+- **Install** - Prompt to install and restart
+
+### Manual Update Check
+
+1. Go to **Settings > About**
+2. Click **Check for Updates**
+3. Follow prompts to update
+
+### Update Settings
+
+- **Auto-download** - Automatically download updates
+- **Notify only** - Show notification but don't auto-download
+- **Disable** - Never check for updates
+
+## Privacy & Security
+
+### Data Storage
+
+All data is stored locally:
+
+- Conversations never leave your device
+- Models run entirely on your computer
+- No telemetry or tracking
+
+### Optional Telemetry
+
+Jan may collect anonymous usage data if enabled:
+
+- App crashes and errors
+- Feature usage statistics
+- Performance metrics
+
+No personal data or conversation content is collected.
+
+**Toggle:** Settings > Advanced > Analytics
+
+## Exporting Data
+
+### Export Conversations
+
+1. Open a thread
+2. Click the menu (three dots)
+3. Select **Export**
+4. Choose format:
+   - JSON - Machine-readable
+   - Markdown - Human-readable
+   - TXT - Plain text
+
+### Backup Jan Data
+
+Manually backup your Jan folder:
+
+1. Go to **Settings > Advanced**
+2. Click **Open Jan Data Folder**
+3. Copy the entire folder to your backup location
+
+<Tip>
+Regularly backup your Jan data folder, especially before major updates or system changes.
+</Tip>

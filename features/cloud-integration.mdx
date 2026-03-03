@@ -1,0 +1,384 @@
+---
+title: Cloud Provider Integration
+description: Connect Jan to OpenAI, Anthropic, Groq, and other cloud AI providers for access to the latest models.
+---
+
+## Overview
+
+Jan supports connecting to major cloud AI providers through their APIs, giving you access to state-of-the-art models like GPT-4o, Claude Opus, and more - all through Jan's unified interface.
+
+<Info>
+  Cloud models require internet connectivity and API keys from providers. Be aware of associated costs and rate limits.
+</Info>
+
+## Why Use Cloud Integration?
+
+<CardGroup cols={2}>
+  <Card title="Latest Models" icon="sparkles">
+    Access cutting-edge models like GPT-4o, Claude Opus 4, and o3 that require massive compute.
+  </Card>
+  <Card title="No Hardware Limits" icon="server">
+    Run large models without worrying about RAM, GPU, or disk space.
+  </Card>
+  <Card title="Unified Interface" icon="window">
+    Switch between local and cloud models seamlessly in the same conversation.
+  </Card>
+  <Card title="Best of Both Worlds" icon="arrows-left-right">
+    Use local models for privacy, cloud models for capability - all in one app.
+  </Card>
+</CardGroup>
+
+## Supported Providers
+
+Jan integrates with these cloud providers:
+
+- **OpenAI**: GPT-4o, o3, o1, GPT-4 Turbo, and more
+- **Anthropic**: Claude Opus 4, Sonnet 4, Haiku 3.5
+- **Groq**: Ultra-fast inference for Llama, Mixtral, and other open models
+- **Mistral AI**: Mistral Large, Medium, and specialized models
+- **Google**: Gemini models
+- **Cohere**: Command models
+- **HuggingFace**: Serverless Inference API
+- **OpenRouter**: Access to 100+ models through one API
+- Any **OpenAI-compatible API** endpoint
+
+## Quick Start
+
+### Connect to OpenAI
+
+<Steps>
+  <Step title="Get Your API Key">
+    1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+    2. Sign in or create an account
+    3. Create a new API key and copy it
+    4. Ensure your account has billing set up with credits
+  </Step>
+  
+  <Step title="Configure Jan">
+    1. Open **Settings** in Jan
+    2. Navigate to **Model Providers > OpenAI**
+    3. Paste your API key
+    4. Click save
+  </Step>
+  
+  <Step title="Start Chatting">
+    1. Open any chat or create a new one
+    2. Click the model selector dropdown
+    3. Choose an OpenAI model (e.g., GPT-4o)
+    4. Start your conversation
+  </Step>
+</Steps>
+
+### Connect to Anthropic
+
+<Steps>
+  <Step title="Get Your API Key">
+    1. Visit [Anthropic Console](https://console.anthropic.com/settings/keys)
+    2. Sign in or create an account
+    3. Create a new API key and copy it
+    4. Ensure your account has credits
+  </Step>
+  
+  <Step title="Configure Jan">
+    1. Open **Settings** in Jan
+    2. Navigate to **Model Providers > Anthropic**
+    3. Paste your API key
+    4. Click save
+  </Step>
+  
+  <Step title="Start Using Claude">
+    1. Open any chat or create a new one
+    2. Select a Claude model from the dropdown
+    3. Start your conversation
+  </Step>
+</Steps>
+
+## Provider-Specific Setup
+
+<Tabs>
+  <Tab title="OpenAI">
+    ### OpenAI Models
+    
+    Available models include:
+    - **GPT-4o**: Most capable multimodal model
+    - **o3/o1**: Advanced reasoning models
+    - **GPT-4 Turbo**: Fast and cost-effective
+    - **GPT-3.5 Turbo**: Budget-friendly option
+    
+    **Add Custom Models**:
+    1. Go to **Settings > Model Providers > OpenAI**
+    2. Click **Add Model**
+    3. Enter the model ID from [OpenAI's model list](https://platform.openai.com/docs/models)
+    4. Save and start using it
+    
+    **Pricing**: Check [OpenAI Pricing](https://openai.com/pricing) for current rates.
+  </Tab>
+  
+  <Tab title="Anthropic">
+    ### Claude Models
+    
+    Available models include:
+    - **Claude Opus 4**: Most capable model for complex tasks
+    - **Claude Sonnet 4**: Balanced performance and speed
+    - **Claude Haiku 3.5**: Fast and cost-effective
+    
+    **Enable Tool Calling**:
+    1. Go to **Settings > Model Providers > Anthropic**
+    2. After adding your API key, click the **+** button
+    3. Enable **Tools** for the model
+    
+    **Pricing**: See [Anthropic Pricing](https://www.anthropic.com/pricing) for details.
+  </Tab>
+  
+  <Tab title="Groq">
+    ### Groq - Ultra-Fast Inference
+    
+    Groq provides extremely fast inference for open-source models:
+    - **Llama 3.3 70B**: Most capable Llama model
+    - **Mixtral 8x7B**: Mixture of experts model
+    - **Gemma 2**: Google's open model family
+    
+    **Setup**:
+    1. Get API key from [Groq Console](https://console.groq.com/keys)
+    2. Add to **Settings > Model Providers > Groq**
+    3. Select Groq models in chat
+    
+    **Benefits**: Free tier available, extremely fast responses, open-source models.
+  </Tab>
+  
+  <Tab title="OpenRouter">
+    ### OpenRouter - Multi-Provider Access
+    
+    OpenRouter provides unified access to 100+ models from different providers:
+    - Claude, GPT-4, Llama, Mixtral, and more
+    - Pay-as-you-go pricing
+    - Automatic failover and load balancing
+    
+    **Setup**:
+    1. Get API key from [OpenRouter](https://openrouter.ai/keys)
+    2. Add to **Settings > Model Providers > OpenRouter**
+    3. Access any model through one API key
+  </Tab>
+</Tabs>
+
+## Managing Cloud Models
+
+### Switch Between Models
+
+You can switch models mid-conversation:
+
+1. Click the model selector dropdown in the chat input
+2. Choose any local or cloud model
+3. Continue the conversation with the new model
+
+<Tip>
+  The new model can see the entire conversation history, making it easy to compare responses or use different models for different tasks.
+</Tip>
+
+### Add Custom Cloud Models
+
+If a specific model isn't listed:
+
+1. Go to **Settings > Model Providers > [Provider]**
+2. Click **Add Model**
+3. Enter the model details:
+   - **ID**: Model identifier from provider's docs
+   - **Name**: Display name in Jan
+   - **Description**: Optional notes
+4. Save and start using it
+
+### Enable Tool Calling
+
+Many cloud models support tool calling for web search, code execution, and more:
+
+1. Navigate to **Settings > Model Providers > [Provider]**
+2. Find your model in the list
+3. Click the **edit button** or **+** icon
+4. Enable **Tools** capability
+5. Now the model can use MCP tools and extensions
+
+## OpenAI-Compatible Endpoints
+
+Jan supports any API that follows the OpenAI API specification:
+
+### Custom Endpoint Setup
+
+1. Go to **Settings > Model Providers > OpenAI**
+2. Enable **Custom Endpoint**
+3. Enter your endpoint URL (e.g., `https://api.example.com/v1`)
+4. Add your API key
+5. Configure available models
+
+### Compatible Services
+
+These services work with Jan's OpenAI integration:
+- **Together AI**: Fast inference for open models
+- **DeepSeek**: Chinese AI provider
+- **Fireworks AI**: Optimized inference platform
+- **Perplexity**: Search-augmented models
+- **Self-hosted APIs**: llama.cpp server, vLLM, text-generation-webui
+
+## Cost Management
+
+### Monitor Usage
+
+<Warning>
+  Cloud API calls incur costs based on tokens processed. Monitor your usage through each provider's dashboard.
+</Warning>
+
+**Best Practices**:
+- Set up billing alerts in your provider's console
+- Start with cheaper models (GPT-3.5, Claude Haiku) for testing
+- Use local models for routine tasks
+- Reserve expensive models (GPT-4o, Claude Opus) for complex work
+
+### Cost Optimization Tips
+
+1. **Use shorter system prompts**: Every token counts
+2. **Clear old conversations**: Don't send unnecessary context
+3. **Choose appropriate models**: Don't use GPT-4o for simple tasks
+4. **Enable streaming**: Better user experience, same cost
+5. **Consider Groq**: Free tier for open-source models
+
+## Privacy Considerations
+
+<Warning>
+  When using cloud providers, your conversations are sent to their servers. Review each provider's privacy policy and terms of service.
+</Warning>
+
+### Data Handling
+
+- **OpenAI**: Does not train on API data by default (verify current policy)
+- **Anthropic**: Does not train on API conversations
+- **Groq**: Check their data retention policies
+- **Others**: Review individual provider policies
+
+### When to Use Local vs Cloud
+
+**Use Local Models For**:
+- Sensitive personal or business data
+- Offline situations
+- Cost-conscious projects with high volume
+- Maximum privacy requirements
+
+**Use Cloud Models For**:
+- Latest capabilities and features
+- Complex reasoning tasks
+- Multimodal work (images, vision)
+- When hardware limitations prevent local inference
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="API Key Issues">
+    **Symptoms**: 401 Unauthorized errors
+    
+    **Solutions**:
+    - Verify API key is copied correctly (no extra spaces)
+    - Check if key is expired or revoked
+    - Ensure billing is set up on provider's account
+    - Confirm key has access to the specific model
+  </Accordion>
+  
+  <Accordion title="Model Not Found (404)">
+    **Symptoms**: Model ID errors
+    
+    **Solutions**:
+    - Check the model ID matches provider's documentation exactly
+    - Verify your account has access to that model
+    - Some models require special access (contact provider)
+    - Ensure API prefix is correct in settings
+  </Accordion>
+  
+  <Accordion title="Rate Limit Errors">
+    **Symptoms**: 429 Too Many Requests
+    
+    **Solutions**:
+    - Wait a moment and try again
+    - Check your tier limits in provider console
+    - Upgrade your account tier if needed
+    - Spread requests over time
+  </Accordion>
+  
+  <Accordion title="Connection Timeouts">
+    **Symptoms**: Requests hanging or timing out
+    
+    **Solutions**:
+    - Check your internet connection
+    - Verify provider's status page for outages
+    - Try a different network or disable VPN
+    - Check firewall/antivirus settings
+  </Accordion>
+  
+  <Accordion title="Insufficient Credits">
+    **Symptoms**: Billing errors
+    
+    **Solutions**:
+    - Add credits to your provider account
+    - Set up automatic billing
+    - Check if free tier has expired
+    - Verify payment method is valid
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Custom Headers
+
+Some providers require custom headers:
+
+1. Go to provider settings in Jan
+2. Look for **Advanced Settings** or **Custom Headers**
+3. Add required headers (e.g., organization ID, project ID)
+4. Save and test connection
+
+### Proxy Configuration
+
+If you're behind a corporate proxy:
+
+1. Go to **Settings > Advanced**
+2. Configure proxy settings:
+   - HTTP/HTTPS proxy URL
+   - Authentication if required
+3. Test connection with a simple request
+
+## Best Practices
+
+<Steps>
+  <Step title="Start with Free Tiers">
+    Many providers offer free credits for new accounts. Test before committing to paid usage.
+  </Step>
+  
+  <Step title="Use Multiple Providers">
+    Don't rely on a single provider. Configure multiple options for redundancy and cost optimization.
+  </Step>
+  
+  <Step title="Match Model to Task">
+    Use appropriate models for each task:
+    - Simple QA: GPT-3.5, Claude Haiku
+    - Complex reasoning: GPT-4o, Claude Opus
+    - Code generation: GPT-4o, Claude Sonnet
+    - Fast iterations: Groq models
+  </Step>
+  
+  <Step title="Monitor Costs">
+    Set up billing alerts and regularly check usage dashboards.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Local Models" icon="laptop" href="/features/local-models">
+    Run models locally for privacy and zero costs
+  </Card>
+  <Card title="Model Parameters" icon="sliders" href="/features/model-parameters">
+    Fine-tune cloud model behavior
+  </Card>
+  <Card title="MCP Integration" icon="plug" href="/features/mcp-integration">
+    Give cloud models access to external tools
+  </Card>
+  <Card title="API Server" icon="server" href="/features/api-server">
+    Set up your own local API endpoint
+  </Card>
+</CardGroup>

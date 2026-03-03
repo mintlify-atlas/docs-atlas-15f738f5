@@ -1,0 +1,462 @@
+---
+title: "Jan Data Folder"
+description: "Understanding Jan's data folder structure and file organization"
+---
+
+## Overview
+
+The Jan Data Folder is where all application data is stored locally on your computer. This includes models, conversations, settings, and extensions.
+
+## Default Locations
+
+Jan stores data in different locations based on your operating system:
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    ~/Library/Application Support/jan
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```bash
+    C:\Users\[YourUsername]\AppData\Roaming\jan
+    ```
+  </Tab>
+  <Tab title="Linux">
+    ```bash
+    ~/.config/jan
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+You can view and change the data folder location in **Settings > Advanced > Jan Data Folder**.
+</Info>
+
+## Folder Structure
+
+The Jan data folder is organized into several subdirectories:
+
+```
+jan/
+├── models/           # Downloaded AI models
+├── threads/          # Conversation threads
+├── assistants/       # Custom assistants
+├── projects/         # Project configurations
+├── extensions/       # MCP servers and plugins
+├── embeddings/       # Vector databases for RAG
+├── uploads/          # Attached files and images
+├── settings.json     # App configuration
+└── providers.json    # Model provider settings
+```
+
+## Detailed Structure
+
+### Models Directory
+
+Stores all downloaded model files:
+
+```
+models/
+├── [provider]/
+│   ├── [model-name]/
+│   │   ├── model.gguf       # Model weights
+│   │   ├── model.json       # Model metadata
+│   │   └── mmproj.gguf      # Vision projection weights (if applicable)
+│   └── ...
+```
+
+**Example:**
+```
+models/
+├── llamacpp/
+│   ├── llama-3-8b-instruct/
+│   │   ├── llama-3-8b-instruct-q5_k_m.gguf
+│   │   └── model.json
+│   ├── llava-1.6-vicuna-7b/
+│   │   ├── llava-v1.6-vicuna-7b-q5_k_m.gguf
+│   │   ├── mmproj-vicuna-7b-f16.gguf
+│   │   └── model.json
+```
+
+<Note>
+Model files are typically large (2GB-40GB+). Ensure adequate storage space before downloading.
+</Note>
+
+### Threads Directory
+
+Stores conversation history:
+
+```
+threads/
+├── [thread-id]/
+│   ├── thread.json          # Thread metadata
+│   └── messages.jsonl       # Message history (JSONL format)
+```
+
+**thread.json example:**
+```json
+{
+  "id": "thread_abc123",
+  "title": "Python debugging help",
+  "created_at": 1234567890,
+  "updated_at": 1234567890,
+  "model": {
+    "id": "llama-3-8b-instruct",
+    "provider": "llamacpp"
+  },
+  "assistants": [{
+    "id": "asst_xyz789",
+    "name": "Code Assistant"
+  }],
+  "metadata": {
+    "hasDocuments": false,
+    "project": null
+  }
+}
+```
+
+**messages.jsonl example:**
+```json
+{"id":"msg_1","role":"user","content":[{"type":"text","text":{"value":"Hello"}}],"created_at":1234567890}
+{"id":"msg_2","role":"assistant","content":[{"type":"text","text":{"value":"Hi there!"}}],"created_at":1234567891}
+```
+
+### Assistants Directory
+
+Stores custom assistant configurations:
+
+```
+assistants/
+├── [assistant-id].json
+```
+
+**Assistant file example:**
+```json
+{
+  "id": "asst_abc123",
+  "name": "Code Reviewer",
+  "avatar": "🤖",
+  "description": "Reviews code for best practices",
+  "instructions": "You are an expert code reviewer...",
+  "created_at": 1234567890,
+  "parameters": {
+    "temperature": 0.3,
+    "max_tokens": 2000,
+    "presence_penalty": 0.1
+  }
+}
+```
+
+### Projects Directory
+
+Stores project configurations and metadata:
+
+```
+projects/
+├── [project-id]/
+│   ├── project.json         # Project settings
+│   └── files/               # Project-specific files
+```
+
+**project.json example:**
+```json
+{
+  "id": "proj_xyz789",
+  "name": "Documentation Project",
+  "assistantId": "asst_abc123",
+  "created_at": 1234567890,
+  "updated_at": 1234567890,
+  "metadata": {
+    "color": "blue",
+    "icon": "📁"
+  }
+}
+```
+
+### Embeddings Directory
+
+Stores vector databases for RAG (Retrieval Augmented Generation):
+
+```
+embeddings/
+├── threads/
+│   └── [thread-id]/          # Thread-specific embeddings
+│       ├── index.faiss       # Vector index
+│       └── metadata.json     # Document metadata
+├── projects/
+│   └── [project-id]/         # Project-wide embeddings
+│       ├── index.faiss
+│       └── metadata.json
+```
+
+<Info>
+Embeddings are created when you attach documents with RAG mode enabled. They allow semantic search across your documents.
+</Info>
+
+### Uploads Directory
+
+Stores attached files and images:
+
+```
+uploads/
+├── [thread-id]/
+│   ├── [file-id].pdf
+│   ├── [file-id].png
+│   └── ...
+```
+
+Files are named using unique identifiers and organized by thread.
+
+### Extensions Directory
+
+Stores MCP servers and plugin configurations:
+
+```
+extensions/
+├── mcp/
+│   ├── servers.json          # MCP server configurations
+│   └── logs/                 # Server logs
+└── plugins/                  # Future plugin support
+```
+
+**servers.json example:**
+```json
+{
+  "filesystem": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/dir"],
+    "env": {},
+    "enabled": true
+  },
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "***"
+    },
+    "enabled": false
+  }
+}
+```
+
+## Configuration Files
+
+### settings.json
+
+Main application settings:
+
+```json
+{
+  "appearance": {
+    "theme": "dark",
+    "fontSize": "medium",
+    "language": "en"
+  },
+  "chat": {
+    "spellCheck": true,
+    "tokenCounterCompact": false
+  },
+  "rag": {
+    "enabled": true,
+    "parseMode": "auto",
+    "maxFileSizeMB": 10,
+    "autoInlineContextRatio": 0.75
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 0
+  },
+  "updates": {
+    "autoCheck": true,
+    "autoDownload": true
+  }
+}
+```
+
+### providers.json
+
+Model provider configurations:
+
+```json
+{
+  "llamacpp": {
+    "provider": "llamacpp",
+    "enabled": true,
+    "models": [
+      {
+        "id": "llama-3-8b-instruct",
+        "name": "Llama 3 8B Instruct",
+        "settings": {
+          "ctx_len": 8192,
+          "ngl": 35,
+          "n_parallel": 1
+        },
+        "capabilities": ["text", "tools"]
+      }
+    ]
+  },
+  "openai": {
+    "provider": "openai",
+    "enabled": false,
+    "apiKey": "***",
+    "baseUrl": "https://api.openai.com/v1",
+    "models": []
+  }
+}
+```
+
+## Storage Management
+
+### Checking Storage Usage
+
+1. Go to **Settings > Advanced**
+2. View **Jan Data Folder** section
+3. See total storage used
+
+### Cleaning Up Storage
+
+#### Delete Unused Models
+```
+models/[provider]/[unused-model]/
+```
+Remove model directories you no longer need.
+
+#### Clear Old Threads
+```
+threads/[old-thread-id]/
+```
+Delete conversation directories you don't need to keep.
+
+#### Remove Embeddings
+```
+embeddings/threads/[thread-id]/
+```
+Delete vector databases for old threads.
+
+<Warning>
+Deleting threads and embeddings is permanent. Export conversations you want to keep before deletion.
+</Warning>
+
+### Moving the Data Folder
+
+To relocate your Jan data:
+
+1. **Close Jan** completely
+2. **Copy** the entire Jan folder to the new location
+3. **Open Jan** and go to Settings > Advanced
+4. Click **Change** next to Jan Data Folder
+5. Select the new location
+6. **Restart Jan**
+
+Alternatively:
+
+1. In Jan, go to **Settings > Advanced**
+2. Click **Change** next to Jan Data Folder
+3. Select new location
+4. Choose to **Move** or **Copy** existing data
+5. Wait for the transfer to complete
+6. Restart Jan
+
+<Tip>
+When moving to a new drive, ensure it has sufficient space for all your models and data.
+</Tip>
+
+## Backup and Restore
+
+### Creating Backups
+
+Manual backup:
+
+1. Close Jan
+2. Copy the entire Jan data folder to your backup location
+3. Include all subdirectories
+
+Automated backup:
+
+```bash
+# macOS/Linux
+cp -r ~/Library/Application\ Support/jan /path/to/backup/jan-backup-$(date +%Y%m%d)
+
+# Windows (PowerShell)
+Copy-Item -Path "$env:APPDATA\jan" -Destination "C:\Backups\jan-backup-$(Get-Date -Format 'yyyyMMdd')" -Recurse
+```
+
+### Restoring from Backup
+
+1. Close Jan
+2. Delete or rename the current Jan data folder
+3. Copy your backup to the Jan data folder location
+4. Restart Jan
+
+<Note>
+Selective restore: You can restore individual components (threads, assistants, models) by copying only specific subdirectories.
+</Note>
+
+## Troubleshooting
+
+### Corrupted Data Folder
+
+If Jan fails to start:
+
+1. Rename the current data folder (e.g., `jan-old`)
+2. Start Jan (creates a fresh folder)
+3. Selectively copy back data from `jan-old`:
+   - Start with `settings.json`
+   - Then `assistants/`
+   - Then `threads/`
+   - Finally `models/` (if not corrupted)
+
+### Missing Models After Update
+
+If models disappear after an update:
+
+1. Check **Settings > Advanced > Jan Data Folder**
+2. Verify the path is correct
+3. Open the folder and check `models/` directory
+4. If models exist but aren't showing, restart Jan
+5. If still missing, re-import from the folder
+
+### Large Storage Usage
+
+If the data folder is too large:
+
+1. Check which models are installed (models are the largest files)
+2. Delete unused models in **Settings > Models**
+3. Clean up old threads and embeddings
+4. Consider moving to a larger drive
+
+<Info>
+A typical Jan installation with 2-3 models uses 10-50GB of storage. Large models (70B parameters) can exceed 40GB each.
+</Info>
+
+## Security Considerations
+
+### Data Encryption
+
+- Jan data is stored unencrypted by default
+- Use full-disk encryption (FileVault, BitLocker) for protection
+- Sensitive conversations should be stored on encrypted volumes
+
+### File Permissions
+
+Jan data folder permissions:
+
+```bash
+# macOS/Linux - should be user-only
+chmod 700 ~/Library/Application\ Support/jan
+
+# Windows - ensure only your user has access
+```
+
+### API Keys and Tokens
+
+Stored in `providers.json` and `extensions/mcp/servers.json`:
+
+- Never commit these files to version control
+- Use environment variables for sensitive values
+- Rotate keys regularly
+
+<Warning>
+If sharing backups, remove sensitive files (`providers.json`, MCP configs) or redact API keys.
+</Warning>

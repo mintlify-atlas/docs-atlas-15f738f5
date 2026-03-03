@@ -1,0 +1,453 @@
+---
+title: Embeddings
+description: Generate vector embeddings for text using Jan's local embedding models.
+---
+
+## Create Embeddings
+
+Creates an embedding vector representing the input text.
+
+<CodeGroup>
+```bash cURL
+curl http://127.0.0.1:1337/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "nomic-embed-text",
+    "input": "The quick brown fox jumps over the lazy dog"
+  }'
+```
+
+```python Python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+response = client.embeddings.create(
+    model="nomic-embed-text",
+    input="The quick brown fox jumps over the lazy dog"
+)
+
+print(response.data[0].embedding)
+```
+
+```javascript JavaScript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:1337/v1',
+  apiKey: 'secret-key-123'
+});
+
+const response = await client.embeddings.create({
+  model: 'nomic-embed-text',
+  input: 'The quick brown fox jumps over the lazy dog'
+});
+
+console.log(response.data[0].embedding);
+```
+</CodeGroup>
+
+### Request Body
+
+<ParamField body="model" type="string" required>
+  ID of the embedding model to use. Must be an embedding model available in Jan.
+  
+  To use an embedding model, ensure it has `"embedding": true` in its settings.
+  
+  Examples: `nomic-embed-text`, `sentence-transformers`
+</ParamField>
+
+<ParamField body="input" type="string | array" required>
+  Input text to embed. Can be a single string or an array of strings.
+  
+  When providing an array, each string will be embedded separately and returned in the same order.
+  
+  Example:
+  ```json
+  "input": "Hello world"
+  ```
+  
+  Or:
+  ```json
+  "input": ["Hello world", "How are you?", "Goodbye!"]
+  ```
+</ParamField>
+
+<ParamField body="encoding_format" type="string" default="float">
+  The format to return the embeddings in.
+  
+  Currently only `"float"` is supported, which returns embeddings as arrays of floating-point numbers.
+</ParamField>
+
+### Response
+
+<ResponseField name="object" type="string">
+  Always `"list"`.
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  The model used for generating embeddings.
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of embedding objects, one for each input string.
+  
+  Each object contains:
+  - `object` (string): Always `"embedding"`
+  - `embedding` (array): The embedding vector as an array of floats
+  - `index` (number): The index of this embedding in the input array
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token usage information.
+  - `prompt_tokens` (number): Number of tokens in the input
+  - `total_tokens` (number): Total tokens processed (same as prompt_tokens for embeddings)
+</ResponseField>
+
+### Example Response (Single Input)
+
+```json
+{
+  "object": "list",
+  "model": "nomic-embed-text",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [
+        0.0023064255,
+        -0.009327292,
+        -0.0028842222,
+        ...
+        -0.012345678
+      ],
+      "index": 0
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 9,
+    "total_tokens": 9
+  }
+}
+```
+
+### Example Response (Multiple Inputs)
+
+```json
+{
+  "object": "list",
+  "model": "nomic-embed-text",
+  "data": [
+    {
+      "object": "embedding",
+      "embedding": [
+        0.0023064255,
+        -0.009327292,
+        ...
+      ],
+      "index": 0
+    },
+    {
+      "object": "embedding",
+      "embedding": [
+        -0.0034567890,
+        0.012345678,
+        ...
+      ],
+      "index": 1
+    },
+    {
+      "object": "embedding",
+      "embedding": [
+        0.0056789012,
+        -0.023456789,
+        ...
+      ],
+      "index": 2
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 18,
+    "total_tokens": 18
+  }
+}
+```
+
+## Batch Processing
+
+Jan automatically batches large embedding requests for optimal performance.
+
+### Request with Multiple Inputs
+
+```bash cURL
+curl http://127.0.0.1:1337/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "nomic-embed-text",
+    "input": [
+      "What is machine learning?",
+      "How does neural network work?",
+      "Explain deep learning",
+      "What are transformers in AI?"
+    ]
+  }'
+```
+
+### Batch Size
+
+Jan processes embeddings in batches for efficiency. The default batch size is 512 tokens (configurable via `ubatch_size` in model settings).
+
+Large requests are automatically split into batches and processed sequentially.
+
+## Use Cases
+
+### Semantic Search
+
+Generate embeddings for documents and queries to find semantically similar content:
+
+```python Python
+import openai
+import numpy as np
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+# Embed documents
+documents = [
+    "Python is a programming language",
+    "JavaScript is used for web development",
+    "Machine learning is a subset of AI"
+]
+
+doc_response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=documents
+)
+
+doc_embeddings = [item.embedding for item in doc_response.data]
+
+# Embed query
+query = "What is Python?"
+query_response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=query
+)
+
+query_embedding = query_response.data[0].embedding
+
+# Calculate cosine similarity
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# Find most similar document
+similarities = [
+    cosine_similarity(query_embedding, doc_emb) 
+    for doc_emb in doc_embeddings
+]
+
+most_similar_idx = np.argmax(similarities)
+print(f"Most similar: {documents[most_similar_idx]}")
+print(f"Similarity: {similarities[most_similar_idx]:.4f}")
+```
+
+### Clustering
+
+Group similar texts together using embedding vectors:
+
+```python Python
+from sklearn.cluster import KMeans
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+texts = [
+    "I love programming",
+    "Coding is fun",
+    "I enjoy cooking",
+    "Baking is relaxing",
+    "Software development is my passion"
+]
+
+response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=texts
+)
+
+embeddings = [item.embedding for item in response.data]
+
+# Cluster into 2 groups
+kmeans = KMeans(n_clusters=2, random_state=0)
+clusters = kmeans.fit_predict(embeddings)
+
+for i, (text, cluster) in enumerate(zip(texts, clusters)):
+    print(f"Cluster {cluster}: {text}")
+```
+
+### Text Classification
+
+Use embeddings as features for classification tasks:
+
+```python Python
+from sklearn.linear_model import LogisticRegression
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+# Training data
+train_texts = [
+    "This movie was amazing!",
+    "Terrible film, waste of time",
+    "Absolutely loved it",
+    "Worst movie ever"
+]
+train_labels = [1, 0, 1, 0]  # 1 = positive, 0 = negative
+
+# Get embeddings
+train_response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=train_texts
+)
+
+train_embeddings = [item.embedding for item in train_response.data]
+
+# Train classifier
+clf = LogisticRegression()
+clf.fit(train_embeddings, train_labels)
+
+# Predict on new text
+test_text = "Great acting and story"
+test_response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=test_text
+)
+
+test_embedding = [test_response.data[0].embedding]
+prediction = clf.predict(test_embedding)
+
+print(f"Sentiment: {'Positive' if prediction[0] == 1 else 'Negative'}")
+```
+
+## Embedding Models
+
+Jan supports various embedding models. To use a model for embeddings:
+
+1. The model must have `"embedding": true` in its settings
+2. The model architecture must be compatible (e.g., BERT, Nomic-BERT)
+
+### Popular Embedding Models
+
+- **nomic-embed-text**: High-quality text embeddings with 768 dimensions
+- **sentence-transformers**: General-purpose sentence embeddings
+- **all-MiniLM-L6-v2**: Lightweight and fast, 384 dimensions
+
+### Model Auto-Loading
+
+If an embedding model is not loaded when you make a request, Jan will:
+
+1. Automatically load the model in embedding mode
+2. Process your request
+3. Keep the model loaded for subsequent requests
+
+If the endpoint returns a `501` status (not available), Jan will reload the model with embedding support enabled.
+
+## Embedding Dimensions
+
+Embedding dimensions vary by model:
+
+- **nomic-embed-text**: 768 dimensions
+- **all-MiniLM-L6-v2**: 384 dimensions
+- **sentence-transformers**: Varies by variant (typically 384-1024)
+
+Higher dimensions generally provide more detailed representations but require more storage and computation.
+
+## Error Handling
+
+### Model Not Available
+
+If you request an embedding from a non-embedding model:
+
+```json
+{
+  "error": {
+    "message": "Model does not support embeddings",
+    "type": "invalid_request_error",
+    "code": "model_not_embedding"
+  }
+}
+```
+
+Status: `400 Bad Request`
+
+### Embedding Endpoint Not Available
+
+If the model doesn't have embedding support enabled:
+
+```json
+{
+  "error": {
+    "message": "Embeddings endpoint not available",
+    "type": "not_implemented_error"
+  }
+}
+```
+
+Status: `501 Not Implemented`
+
+Jan will automatically reload the model with embedding support and retry.
+
+### Input Too Long
+
+If input exceeds the model's maximum token limit:
+
+```json
+{
+  "error": {
+    "message": "Input exceeds maximum token limit",
+    "type": "invalid_request_error",
+    "code": "context_length_exceeded"
+  }
+}
+```
+
+Status: `400 Bad Request`
+
+## Performance Tips
+
+### Batch Requests
+
+Process multiple texts in a single request for better performance:
+
+```python
+# Good - Single request with batch
+response = client.embeddings.create(
+    model="nomic-embed-text",
+    input=["text1", "text2", "text3"]
+)
+
+# Less efficient - Multiple requests
+for text in ["text1", "text2", "text3"]:
+    response = client.embeddings.create(
+        model="nomic-embed-text",
+        input=text
+    )
+```
+
+### Keep Model Loaded
+
+Embedding models stay loaded in memory for subsequent requests. Avoid unloading between requests to maintain performance.
+
+### GPU Acceleration
+
+Enable GPU acceleration by setting `ngl` (number of GPU layers) in model settings for faster embedding generation.

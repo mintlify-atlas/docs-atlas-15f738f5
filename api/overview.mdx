@@ -1,0 +1,138 @@
+---
+title: API Overview
+description: Learn how to use Jan's OpenAI-compatible local API server for private AI development.
+---
+
+## Introduction
+
+Jan provides a built-in, OpenAI-compatible API server that runs entirely on your computer, powered by `llama.cpp`. Use it as a drop-in replacement for cloud APIs to build private, offline-capable AI applications.
+
+The API server is accessible at `http://127.0.0.1:1337` by default and follows OpenAI's API conventions.
+
+## Base URL
+
+```
+http://127.0.0.1:1337/v1
+```
+
+## Authentication
+
+All API requests require authentication using a Bearer token in the `Authorization` header.
+
+### Setting up Authentication
+
+1. Navigate to **Settings** > **Local API Server** in Jan
+2. Enter a custom **API Key** (e.g., `secret-key-123`)
+3. Click **Start Server**
+
+### Using the API Key
+
+Include the API key in all requests:
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Example Request
+
+```bash
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "llama3-8b-instruct",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+## Server Configuration
+
+### Network Settings
+
+<ParamField path="host" type="string" default="127.0.0.1">
+  The network address the server listens on.
+  - `127.0.0.1`: Accessible only from your computer (most secure)
+  - `0.0.0.0`: Accessible from other devices on your network
+</ParamField>
+
+<ParamField path="port" type="number" default="1337">
+  The port number for the API server. You can change this to any available port (e.g., `8000`).
+</ParamField>
+
+<ParamField path="api_prefix" type="string" default="/v1">
+  The base path for all API endpoints. Follows OpenAI's convention.
+</ParamField>
+
+### Security Settings
+
+<ParamField path="api_key" type="string" required>
+  A mandatory secret key to authenticate requests. Must be included in the `Authorization: Bearer YOUR_API_KEY` header for all requests.
+</ParamField>
+
+<ParamField path="trusted_hosts" type="string">
+  A comma-separated list of hostnames allowed to access the server. Provides an additional layer of security when the server is exposed on your network.
+</ParamField>
+
+### Advanced Settings
+
+<ParamField path="cors" type="boolean" default={true}>
+  Enables Cross-Origin Resource Sharing (CORS) to allow web applications running on different domains to make requests to the API server. Disable for non-browser-based applications.
+</ParamField>
+
+<ParamField path="verbose_logs" type="boolean" default={true}>
+  Provides detailed, real-time logs of all incoming requests, responses, and server activity. Useful for debugging.
+</ParamField>
+
+## Available Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Chat Completions" icon="comments" href="/api/chat-completions">
+    Generate chat completions with streaming support
+  </Card>
+  <Card title="Models" icon="cube" href="/api/models">
+    List and retrieve available models
+  </Card>
+  <Card title="Embeddings" icon="vector-square" href="/api/embeddings">
+    Generate embeddings for text inputs
+  </Card>
+</CardGroup>
+
+## Error Handling
+
+The API uses standard HTTP status codes:
+
+- `200` - Success
+- `400` - Bad Request (invalid parameters)
+- `401` - Unauthorized (missing or invalid API key)
+- `404` - Not Found (model not available)
+- `500` - Internal Server Error
+
+### Error Response Format
+
+```json
+{
+  "error": {
+    "message": "Error description",
+    "type": "invalid_request_error",
+    "code": "model_not_found"
+  }
+}
+```
+
+## Troubleshooting
+
+### Connection Refused
+The server is not running, or your application is pointing to the wrong host or port.
+
+### 401 Unauthorized
+Your API Key is missing from the `Authorization` header or is incorrect.
+
+### 404 Not Found
+- The `model` ID in your request body does not match an available model in Jan
+- Your request URL is incorrect (check the API Prefix)
+
+### CORS Error (in web browser)
+Ensure the CORS toggle is enabled in Jan's settings.
+
+### Out of Context
+The conversation has exceeded the model's context window. The API will return a `finish_reason` of `length`.

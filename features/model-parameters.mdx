@@ -1,0 +1,505 @@
+---
+title: Model Parameters
+description: Fine-tune how your AI models think, respond, and perform by configuring parameters like temperature, context length, and GPU acceleration.
+---
+
+## Overview
+
+Model parameters control every aspect of how your AI behaves - from creativity and randomness to memory and processing speed. Understanding these settings helps you get the most out of both local and cloud models.
+
+<Info>
+  You can adjust parameters per-conversation or set permanent defaults for each model. Changes apply immediately.
+</Info>
+
+## Accessing Settings
+
+There are multiple ways to configure model behavior:
+
+<Tabs>
+  <Tab title="Per-Conversation">
+    Adjust settings for a specific chat:
+    
+    1. Open any conversation
+    2. Click the **gear icon** next to your selected model
+    3. Modify parameters in the sidebar
+    4. Changes apply to this conversation only
+    
+    <Tip>
+      Use per-conversation settings to experiment without affecting your model's default behavior.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Permanent Defaults">
+    Set default parameters for a model:
+    
+    1. Go to **Settings > Model Providers > Llama.cpp** (or your provider)
+    2. Find your model in the list
+    3. Click the **gear icon** next to the model
+    4. Adjust default parameters
+    5. These settings apply to all new conversations
+  </Tab>
+  
+  <Tab title="Model Capabilities">
+    Enable/disable special features:
+    
+    1. Go to **Settings > Model Providers > [Provider]**
+    2. Find your model
+    3. Click the **edit button** next to the model
+    4. Toggle capabilities:
+       - **Vision**: Image understanding
+       - **Tools**: External tool calling (MCP)
+       - **Embeddings**: Vector representations
+       - **Reasoning**: Step-by-step thinking
+  </Tab>
+</Tabs>
+
+## Core Parameters
+
+### Temperature
+
+Controls randomness and creativity in responses.
+
+| Value | Behavior | Best For |
+|-------|----------|----------|
+| **0.0 - 0.3** | Deterministic, focused, factual | Code generation, math, factual Q&A |
+| **0.4 - 0.7** | Balanced creativity and coherence | General chat, explanations, summaries |
+| **0.8 - 1.0** | Creative, varied, exploratory | Creative writing, brainstorming, storytelling |
+| **1.0+** | Highly random, experimental | Experimental or artistic purposes |
+
+<CodeGroup>
+```bash Low Temperature (0.2)
+# Same prompt, similar outputs
+Prompt: "What is 2+2?"
+Output 1: "2+2 equals 4."
+Output 2: "2+2 equals 4."
+Output 3: "2+2 equals 4."
+```
+
+```bash High Temperature (1.0)
+# Same prompt, varied outputs
+Prompt: "Describe a sunset"
+Output 1: "Golden rays paint the sky crimson..."
+Output 2: "The sun melts into the horizon like honey..."
+Output 3: "Fiery oranges blend with deep purples..."
+```
+</CodeGroup>
+
+<Tip>
+  Start with **0.7** for general use. Lower it for precision tasks, raise it for creative work.
+</Tip>
+
+### Top P (Nucleus Sampling)
+
+Controls diversity by limiting the pool of considered tokens.
+
+- **0.9** (default): Considers top 90% probability tokens - good balance
+- **0.95**: Slightly more diverse outputs
+- **0.5**: Very focused, less variety
+- **1.0**: Considers all tokens
+
+<Info>
+  Top P works together with temperature. Both control randomness, but in different ways. Most users can leave Top P at default (0.9-0.95).
+</Info>
+
+### Top K
+
+Limits the model to choosing from the K most likely next tokens.
+
+- **40** (default): Moderate variety
+- **20**: More focused outputs
+- **80-100**: More diverse outputs
+
+<Note>
+  Top K and Top P serve similar purposes. Many models work well with defaults - adjust only if you notice issues with repetition or randomness.
+</Note>
+
+### Max Tokens
+
+Maximum number of tokens the model can generate in a single response.
+
+- **512**: Short responses (a few paragraphs)
+- **2048**: Medium responses (most use cases)
+- **4096+**: Long-form content (essays, code, detailed explanations)
+- **-1**: Unlimited (continues until natural stopping point)
+
+<Warning>
+  Higher max tokens = longer potential responses but also higher processing time and cost (for cloud models). The model may stop earlier if it naturally completes the response.
+</Warning>
+
+## Memory Settings
+
+### Context Length (Context Size)
+
+How much conversation history the model remembers.
+
+| Tokens | Approximate Words | Best For |
+|--------|-------------------|----------|
+| **2048** | ~1,500 words | Short Q&A, limited RAM |
+| **4096** | ~3,000 words | Standard conversations |
+| **8192** | ~6,000 words | Long discussions (default) |
+| **16384+** | ~12,000+ words | Very long conversations, document analysis |
+| **32768+** | ~24,000+ words | Entire documents, extensive context |
+
+<Info>
+  Jan defaults to **8192 tokens** or your model's maximum (whichever is smaller). This handles most conversations well.
+</Info>
+
+**Memory Impact**:
+- Longer context = more RAM/VRAM usage
+- Each message in history consumes context
+- Tools and system prompts also use context
+
+<Tip>
+  If you hit context limits, start a new conversation or summarize the discussion so far.
+</Tip>
+
+## Hardware Acceleration
+
+### GPU Layers (ngl)
+
+Controls how many model layers run on your GPU vs CPU.
+
+| Setting | Performance | Memory | When to Use |
+|---------|-------------|--------|-------------|
+| **Max (e.g., 40)** | Fastest | High VRAM usage | You have a powerful GPU with plenty of VRAM |
+| **Moderate (20)** | Balanced | Medium VRAM | GPU has limited memory |
+| **0** | Slowest | No VRAM usage | CPU-only inference |
+
+<Steps>
+  <Step title="Start High">
+    Set GPU Layers to maximum (e.g., 40 for most models).
+  </Step>
+  
+  <Step title="Monitor Performance">
+    Run the model and check if it loads successfully.
+  </Step>
+  
+  <Step title="Reduce if Needed">
+    If you get out-of-memory errors, reduce by 5-10 layers at a time until it works.
+  </Step>
+</Steps>
+
+<Info>
+  **Apple Silicon (M1/M2/M3/M4)**: GPU layers are automatically offloaded to the unified memory. Just maximize the setting.
+</Info>
+
+### Continuous Batching
+
+Processes multiple requests or tokens simultaneously for better throughput.
+
+- **Enabled** (recommended): Better performance for multiple conversations or tool calls
+- **Disabled**: Simpler processing, slightly lower memory usage
+
+<Tip>
+  Keep this enabled unless you're troubleshooting issues.
+</Tip>
+
+## Repetition Control
+
+### Repeat Penalty
+
+Reduces the likelihood of repeating the same words or phrases.
+
+- **1.0**: No penalty (default for some models)
+- **1.1 - 1.3**: Reduces repetition (recommended for most users)
+- **1.5+**: Strongly discourages repetition (may affect coherence)
+
+<Warning>
+  Values above 1.5 can make responses feel awkward or forced. Start around 1.1-1.2.
+</Warning>
+
+### Frequency Penalty
+
+Reduces repetition based on how often tokens appear.
+
+- **0**: No penalty
+- **0.1 - 0.3**: Mild discouragement of repeated words
+- **0.5+**: Strong penalty (can reduce coherence)
+
+### Presence Penalty
+
+Encourages the model to explore new topics.
+
+- **0**: No penalty (sticks to current topic)
+- **0.1 - 0.5**: Encourages topic variety
+- **1.0+**: Strongly pushes for new topics (may lose focus)
+
+<Tip>
+  Use **Repeat Penalty** for general repetition issues. Use **Frequency/Presence Penalties** for more nuanced control over topic exploration.
+</Tip>
+
+## Advanced Settings
+
+### Min P
+
+Minimum probability threshold for token selection.
+
+- **0.05** (default): Prevents very unlikely tokens
+- Lower values: Allow more unlikely tokens (more creative)
+- Higher values: Restrict to likely tokens (more focused)
+
+<Info>
+  Most users don't need to adjust Min P. It works well at default settings.
+</Info>
+
+### Stop Sequences
+
+Tokens or strings that tell the model to stop generating.
+
+```json
+"stop": ["\n\n", "User:", "###"]
+```
+
+- Model stops when it generates any of these strings
+- Useful for controlling output format
+- Often used in chat templates
+
+### Prompt Template
+
+Defines how the model interprets system messages, user input, and assistant responses.
+
+```
+<|system|>
+{system_message}<|user|>
+{prompt}<|assistant|>
+```
+
+<Warning>
+  Changing the prompt template can break model behavior. Only modify if you understand your model's expected format.
+</Warning>
+
+## Use Case Presets
+
+<Tabs>
+  <Tab title="General Chat">
+    Balanced settings for everyday conversations:
+    
+    ```json
+    {
+      "temperature": 0.7,
+      "top_p": 0.9,
+      "max_tokens": 2048,
+      "context_length": 8192,
+      "repeat_penalty": 1.1
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Code Generation">
+    Precise, deterministic output for coding:
+    
+    ```json
+    {
+      "temperature": 0.2,
+      "top_p": 0.9,
+      "max_tokens": 4096,
+      "context_length": 8192,
+      "repeat_penalty": 1.0
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Creative Writing">
+    Higher creativity for stories and content:
+    
+    ```json
+    {
+      "temperature": 0.9,
+      "top_p": 0.95,
+      "max_tokens": 4096,
+      "context_length": 8192,
+      "presence_penalty": 0.3
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Factual Q&A">
+    Focused, accurate responses:
+    
+    ```json
+    {
+      "temperature": 0.1,
+      "top_p": 0.9,
+      "max_tokens": 1024,
+      "context_length": 4096,
+      "repeat_penalty": 1.1
+    }
+    ```
+  </Tab>
+  
+  <Tab title="Long Documents">
+    Maximum context for document analysis:
+    
+    ```json
+    {
+      "temperature": 0.5,
+      "top_p": 0.9,
+      "max_tokens": 4096,
+      "context_length": 32768,
+      "repeat_penalty": 1.15
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Responses Too Repetitive">
+    **Symptoms**: Model keeps repeating words, phrases, or ideas
+    
+    **Solutions**:
+    - Increase **Temperature** to 0.8-1.0
+    - Increase **Repeat Penalty** to 1.2-1.3
+    - Add **Frequency Penalty** around 0.2
+    - Try a different model (some are more prone to repetition)
+  </Accordion>
+  
+  <Accordion title="Responses Too Random/Incoherent">
+    **Symptoms**: Output doesn't make sense or goes off-topic
+    
+    **Solutions**:
+    - Lower **Temperature** to 0.3-0.5
+    - Reduce **Top P** to 0.85
+    - Lower **Top K** to 30-40
+    - Check your prompt for clarity
+  </Accordion>
+  
+  <Accordion title="Out of Memory Errors">
+    **Symptoms**: Model fails to load or crashes mid-generation
+    
+    **Solutions**:
+    - Reduce **GPU Layers** by 5-10 at a time
+    - Lower **Context Length** to 4096 or less
+    - Close other memory-intensive applications
+    - Try a smaller model or lower quantization (Q4 instead of Q8)
+    - Reduce **Max Tokens** if generating very long responses
+  </Accordion>
+  
+  <Accordion title="Very Slow Responses">
+    **Symptoms**: Model takes forever to generate text
+    
+    **Solutions**:
+    - Increase **GPU Layers** to maximum (if you have a GPU)
+    - Verify you're using the correct backend (CUDA for NVIDIA, Metal for Apple)
+    - Enable **Continuous Batching**
+    - Reduce **Context Length** if very high (32k+ can be slow)
+    - Close background applications
+    - Try a smaller/faster model
+  </Accordion>
+  
+  <Accordion title="Model Won't Use Tools/MCP">
+    **Symptoms**: Model ignores available tools
+    
+    **Solutions**:
+    - Enable **Tools** capability in model settings (click edit button)
+    - Lower **Temperature** to 0.3-0.5 for more consistent tool calling
+    - Be explicit: "Use the search tool to find..."
+    - Try a model known for good tool calling (Jan v1, Claude, GPT-4)
+  </Accordion>
+</AccordionGroup>
+
+## Model Capabilities
+
+Beyond parameters, you can enable special features:
+
+### Vision
+
+Lets the model analyze images you share.
+
+<Steps>
+  <Step title="Enable Vision">
+    Click the **edit button** next to your model and toggle **Vision** on.
+  </Step>
+  
+  <Step title="Share Images">
+    In chat, click the image icon or paste images directly.
+  </Step>
+  
+  <Step title="Ask Questions">
+    "What's in this image?" or "Describe this diagram in detail."
+  </Step>
+</Steps>
+
+<Info>
+  **Supported Models**: GPT-4o, Claude Opus/Sonnet 4, Gemini Pro, LLaVA (local), Jan v2 VL
+</Info>
+
+### Tools (MCP)
+
+Enables external tool calling via Model Context Protocol.
+
+<Steps>
+  <Step title="Enable Tools">
+    Click the **edit button** next to your model and toggle **Tools** on.
+  </Step>
+  
+  <Step title="Configure MCP Servers">
+    See [MCP Integration guide](/features/mcp-integration) for setting up tools.
+  </Step>
+  
+  <Step title="Use in Conversations">
+    Model automatically uses tools when needed or when explicitly asked.
+  </Step>
+</Steps>
+
+### Reasoning
+
+Enables step-by-step thinking for complex problems.
+
+- Best for: Math, logic puzzles, multi-step reasoning
+- Models: o3, o1, Claude Opus, specialized reasoning models
+- May increase response time but improves accuracy
+
+### Embeddings
+
+Generates vector representations of text for semantic search and RAG.
+
+- Enable for: Document search, semantic similarity, RAG applications
+- Not needed for regular chat
+- Specialized models (e.g., `bge-large-en`) work best
+
+## Best Practices
+
+<Steps>
+  <Step title="Start with Defaults">
+    Use Jan's defaults first. They work well for most use cases.
+  </Step>
+  
+  <Step title="Change One Thing at a Time">
+    When tuning, adjust one parameter at a time so you understand its impact.
+  </Step>
+  
+  <Step title="Match Task to Settings">
+    Use appropriate presets: low temperature for code, high for creativity.
+  </Step>
+  
+  <Step title="Monitor Context Usage">
+    Long conversations eat up context. Start fresh if you hit limits.
+  </Step>
+  
+  <Step title="Maximize GPU Usage">
+    If you have a GPU, max out GPU layers for best performance.
+  </Step>
+  
+  <Step title="Document Your Settings">
+    If you find settings that work well, note them for future reference.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Local Models" icon="laptop" href="/features/local-models">
+    Learn which models work best for different parameter configurations
+  </Card>
+  <Card title="MCP Integration" icon="plug" href="/features/mcp-integration">
+    Enhance models with external tools and data sources
+  </Card>
+  <Card title="API Server" icon="server" href="/features/api-server">
+    Use parameter-tuned models via API
+  </Card>
+  <Card title="Cloud Integration" icon="cloud" href="/features/cloud-integration">
+    Apply parameters to cloud models like GPT-4 and Claude
+  </Card>
+</CardGroup>

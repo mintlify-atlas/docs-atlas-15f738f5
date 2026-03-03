@@ -1,0 +1,415 @@
+---
+title: jan launch
+description: Start a local model and launch an AI agent with it pre-wired
+---
+
+## Usage
+
+```bash
+jan launch [PROGRAM] [OPTIONS] [-- PROGRAM_ARGS...]
+```
+
+Start a local model, then launch an AI agent or program with environment variables automatically set to use the local model.
+
+## Arguments
+
+<ParamField path="program" type="string">
+  Agent or program to run after the model is ready.
+
+  Supported agents:
+  - `claude` — Claude Code (Anthropic's AI coding agent)
+  - `codex` — Codex CLI (OpenAI's coding agent)
+  - `openclaw` — OpenClaw (open-source autonomous AI agent)
+
+  Omit to pick interactively from the list above.
+
+  ```bash
+  jan launch claude
+  jan launch openclaw
+  jan launch  # Pick interactively
+  ```
+</ParamField>
+
+<ParamField path="program_args" type="array">
+  Arguments forwarded to the program. Use `--` to separate them from `jan` options.
+
+  ```bash
+  jan launch claude -- --help
+  jan launch openclaw -- tui --debug
+  ```
+</ParamField>
+
+## Options
+
+### Model Selection
+
+<ParamField query="model" type="string">
+  Model ID to load. Omit to pick interactively from installed models.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b-a3b
+  ```
+
+  Can be:
+  - A model ID from `jan models list` (e.g. `qwen3.5-35b-a3b`)
+  - A HuggingFace repo ID (e.g. `Qwen/Qwen2.5-35B-Instruct-GGUF`) — will auto-download
+</ParamField>
+
+<ParamField query="bin" type="string">
+  Path to the inference binary. Auto-discovered from Jan data folder when omitted.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --bin /usr/local/bin/llama-server
+  ```
+</ParamField>
+
+### Server Configuration
+
+<ParamField query="port" type="number" default="6767">
+  Port the model server listens on.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --port 8080
+  ```
+</ParamField>
+
+<ParamField query="api-key" type="string" default="jan">
+  API key for the model server. Exported as `OPENAI_API_KEY` and `ANTHROPIC_AUTH_TOKEN`.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --api-key my-secret-key
+  ```
+</ParamField>
+
+### Performance Configuration
+
+<ParamField query="n-gpu-layers" type="number" default="-1">
+  GPU layers to offload.
+
+  - `-1`: All layers (full GPU acceleration)
+  - `0`: CPU only
+  - `> 0`: Specific number of layers to offload
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --n-gpu-layers 35
+  ```
+</ParamField>
+
+<ParamField query="ctx-size" type="number" default="4096">
+  Context window size in tokens.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --ctx-size 8192
+  ```
+
+  <Note>
+    Setting `--ctx-size` explicitly disables auto-fit. Omit this option when launching Claude to enable auto-fit by default.
+  </Note>
+</ParamField>
+
+<ParamField query="fit" type="boolean">
+  Auto-fit context to available VRAM.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --fit
+  ```
+
+  **Default behavior**:
+  - When launching `claude`: `--fit` defaults to `true` (unless `--ctx-size` is set explicitly)
+  - When launching other programs: `--fit` defaults to `false`
+</ParamField>
+
+### Output Control
+
+<ParamField query="verbose" type="boolean" default="false">
+  Print full server logs (llama.cpp / mlx output) instead of the loading spinner.
+
+  ```bash
+  jan launch claude --model qwen3.5-35b --verbose
+  jan launch claude --model qwen3.5-35b -v
+  ```
+</ParamField>
+
+## Examples
+
+<CodeGroup>
+```bash Basic usage
+# Pick agent and model interactively
+jan launch
+
+# Launch Claude Code with a specific model
+jan launch claude --model qwen3.5-35b-a3b
+
+# Launch OpenClaw
+jan launch openclaw --model qwen3.5-35b-a3b
+```
+
+```bash With arguments
+# Pass arguments to the launched program
+jan launch claude -- --help
+jan launch openclaw -- tui --debug
+```
+
+```bash Custom configuration
+# Custom port and API key
+jan launch claude --model qwen3.5-35b --port 8080 --api-key secret
+
+# Maximize context window
+jan launch claude --model qwen3.5-35b --fit
+
+# CPU only
+jan launch claude --model qwen3.5-35b --n-gpu-layers 0
+```
+
+```bash HuggingFace auto-download
+# Download and launch with a HuggingFace model
+jan launch claude --model Qwen/Qwen2.5-35B-Instruct-GGUF
+```
+</CodeGroup>
+
+## Environment Variables
+
+Depending on the launched agent, Jan sets different environment variables:
+
+### For Claude Code & Codex
+
+```bash
+OPENAI_BASE_URL=http://127.0.0.1:6767/v1
+OPENAI_API_KEY=jan
+OPENAI_MODEL=qwen3.5-35b-a3b
+ANTHROPIC_BASE_URL=http://127.0.0.1:6767
+ANTHROPIC_AUTH_TOKEN=jan  # or ANTHROPIC_API_KEY for non-Claude agents
+ANTHROPIC_DEFAULT_OPUS_MODEL=qwen3.5-35b-a3b
+ANTHROPIC_DEFAULT_SONNET_MODEL=qwen3.5-35b-a3b
+ANTHROPIC_DEFAULT_HAIKU_MODEL=qwen3.5-35b-a3b
+```
+
+### For OpenClaw
+
+Jan configures OpenClaw via `~/.openclaw/openclaw.json` instead of environment variables:
+
+```json
+{
+  "models": {
+    "providers": {
+      "jan": {
+        "baseUrl": "http://127.0.0.1:6767/v1",
+        "apiKey": "jan",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen3.5-35b-a3b",
+            "name": "qwen3.5-35b-a3b",
+            "input": ["text"],
+            "reasoning": false,
+            "contextWindow": 131072,
+            "maxTokens": 16384,
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "jan/qwen3.5-35b-a3b"
+      }
+    }
+  }
+}
+```
+
+Provider API keys are cleared to prevent overrides:
+- `OPENAI_API_KEY`, `OPENAI_BASE_URL`
+- `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_OAUTH_TOKEN`
+- `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`
+- `XAI_API_KEY`, `OPENROUTER_API_KEY`
+
+## Output
+
+### Loading
+
+```
+✓ qwen3.5-35b-a3b ready · http://127.0.0.1:6767
+
+  OPENAI_BASE_URL=http://127.0.0.1:6767/v1
+  OPENAI_API_KEY=jan
+  OPENAI_MODEL=qwen3.5-35b-a3b
+  ANTHROPIC_BASE_URL=http://127.0.0.1:6767
+  ANTHROPIC_AUTH_TOKEN=jan
+  ANTHROPIC_DEFAULT_OPUS_MODEL=qwen3.5-35b-a3b
+  ANTHROPIC_DEFAULT_SONNET_MODEL=qwen3.5-35b-a3b
+  ANTHROPIC_DEFAULT_HAIKU_MODEL=qwen3.5-35b-a3b
+
+  → Launching: claude
+```
+
+Then Claude Code (or your chosen agent) starts with the local model pre-configured.
+
+### For OpenClaw
+
+```
+✓ qwen3.5-35b-a3b ready · http://127.0.0.1:6767
+
+  ~/.openclaw/openclaw.json → jan provider configured
+  agents.defaults.model.primary = jan/qwen3.5-35b-a3b
+
+  → Launching: openclaw tui
+```
+
+## Workflow
+
+When you run `jan launch`:
+
+1. **Model Selection**: Pick a model (interactively or via `--model`)
+2. **Model Loading**: Start the model server with optimized settings
+3. **Environment Setup**:
+   - For Claude/Codex: Set environment variables
+   - For OpenClaw: Write `~/.openclaw/openclaw.json`
+4. **Agent Launch**: Execute the chosen program with the local model pre-wired
+5. **Cleanup**: When the agent exits, stop the model server
+
+## Supported Agents
+
+### Claude Code
+
+```bash
+jan launch claude --model qwen3.5-35b-a3b
+```
+
+Launches Anthropic's Claude Code agent with:
+- `ANTHROPIC_AUTH_TOKEN` set to your API key (default: `jan`)
+- `ANTHROPIC_BASE_URL` pointing to local model
+- All Anthropic model defaults (`OPUS`, `SONNET`, `HAIKU`) set to your local model
+- Auto-fit enabled by default for maximum context window
+
+### Codex CLI
+
+```bash
+jan launch codex --model qwen3.5-35b-a3b
+```
+
+Launches OpenAI's Codex CLI with:
+- `OPENAI_API_KEY` set to your API key (default: `jan`)
+- `OPENAI_BASE_URL` pointing to local model
+- `OPENAI_MODEL` set to your local model ID
+
+### OpenClaw
+
+```bash
+jan launch openclaw --model qwen3.5-35b-a3b
+```
+
+Launches the open-source OpenClaw agent with:
+- `~/.openclaw/openclaw.json` configured with Jan provider
+- Default model set to `jan/<model_id>`
+- OpenClaw's TUI automatically started (unless you pass custom args)
+
+## Performance Tips
+
+### Maximize Context for Claude Code
+
+```bash
+jan launch claude --model qwen3.5-35b
+```
+
+Auto-fit is enabled by default when launching Claude, maximizing the context window based on available VRAM.
+
+### Custom Context Size
+
+```bash
+jan launch claude --model qwen3.5-35b --ctx-size 8192
+```
+
+Setting `--ctx-size` explicitly disables auto-fit and uses your specified size.
+
+### CPU-Only Mode
+
+```bash
+jan launch claude --model qwen3.5-35b --n-gpu-layers 0
+```
+
+## HuggingFace Auto-Download
+
+Download and launch with a HuggingFace model:
+
+```bash
+jan launch claude --model Qwen/Qwen2.5-35B-Instruct-GGUF
+```
+
+Jan will:
+1. Fetch available GGUF files
+2. Let you pick a quantization
+3. Download the model
+4. Start the model server
+5. Launch Claude Code
+
+For private/gated models:
+
+```bash
+export HF_TOKEN="your_token_here"
+jan launch claude --model meta-llama/Llama-3.3-70B-Instruct-GGUF
+```
+
+## Troubleshooting
+
+### Agent Not Found
+
+```
+Error launching 'claude': No such file or directory
+```
+
+**Solution**: Ensure the agent is installed and available in your `PATH`.
+
+```bash
+# For Claude Code
+which claude
+
+# For OpenClaw
+which openclaw
+```
+
+### Model Not Found
+
+```
+Error: model not found in data folder
+```
+
+**Solution**: Download the model using the Jan desktop app, or use a HuggingFace repo ID to auto-download.
+
+### Binary Not Found
+
+```
+✗ llama-server binary not found
+```
+
+**Solution**: Install a backend from Jan's settings, or specify the binary path with `--bin`.
+
+### OpenClaw Config Override
+
+If OpenClaw still uses a cloud provider instead of Jan:
+
+**Solution**: Check for environment variables that override the config:
+
+```bash
+env | grep -E '(OPENAI|ANTHROPIC|GEMINI|MISTRAL|GROQ|XAI|OPENROUTER)'
+```
+
+Jan clears these automatically, but they may be set in your shell config (`.bashrc`, `.zshrc`, etc.).
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="Serve Command" icon="server" href="/cli/serve">
+    Run models without launching an agent
+  </Card>
+  <Card title="Commands Reference" icon="terminal" href="/cli/commands">
+    Complete reference for all CLI commands
+  </Card>
+</CardGroup>

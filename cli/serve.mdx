@@ -1,0 +1,439 @@
+---
+title: jan serve
+description: Load a local model and expose it via OpenAI-compatible API
+---
+
+## Usage
+
+```bash
+jan serve [MODEL_ID] [OPTIONS]
+```
+
+Load a local model and expose it at `localhost:6767/v1`. Auto-detects LlamaCPP or MLX engine.
+
+## Arguments
+
+<ParamField path="model_id" type="string">
+  Model ID to load. Omit to pick interactively from installed models.
+
+  Can be:
+  - A model ID from `jan models list` (e.g. `qwen3.5-35b-a3b`)
+  - A HuggingFace repo ID (e.g. `Qwen/Qwen2.5-35B-Instruct-GGUF`) — will auto-download
+  - Derived from `--model-path` filename if path is provided
+</ParamField>
+
+## Options
+
+### Model Configuration
+
+<ParamField query="model-path" type="string">
+  Path to the GGUF file. Auto-resolved from `model.yml` when omitted.
+
+  ```bash
+  jan serve --model-path /path/to/model.gguf
+  ```
+</ParamField>
+
+<ParamField query="bin" type="string">
+  Path to the inference binary. Auto-discovered from Jan data folder when omitted.
+
+  ```bash
+  jan serve qwen3.5-35b --bin /usr/local/bin/llama-server
+  ```
+</ParamField>
+
+<ParamField query="mmproj" type="string">
+  mmproj path for vision-language models. Auto-resolved from `model.yml` when omitted.
+
+  ```bash
+  jan serve llava-v1.6 --mmproj /path/to/mmproj.gguf
+  ```
+</ParamField>
+
+### Server Configuration
+
+<ParamField query="port" type="number" default="6767">
+  Port the model server listens on. Use `0` to pick a random free port.
+
+  ```bash
+  jan serve qwen3.5-35b --port 8080
+  ```
+</ParamField>
+
+<ParamField query="api-key" type="string" default="">
+  API key required by clients. Sets `LLAMA_API_KEY` / `MLX_API_KEY` on the server.
+
+  ```bash
+  jan serve qwen3.5-35b --api-key my-secret-key
+  ```
+
+  Clients must include this in their requests:
+  ```bash
+  curl http://localhost:6767/v1/chat/completions \
+    -H "Authorization: Bearer my-secret-key" \
+    -H "Content-Type: application/json" \
+    -d '{"model": "qwen3.5-35b", "messages": [{"role": "user", "content": "Hello"}]}'
+  ```
+</ParamField>
+
+<ParamField query="timeout" type="number" default="120">
+  Seconds to wait for the model server to become ready.
+
+  ```bash
+  jan serve qwen3.5-35b --timeout 180
+  ```
+</ParamField>
+
+### Performance Configuration
+
+<ParamField query="n-gpu-layers" type="number" default="-1">
+  GPU layers to offload.
+
+  - `-1`: All layers (full GPU acceleration)
+  - `0`: CPU only
+  - `> 0`: Specific number of layers to offload
+
+  ```bash
+  jan serve qwen3.5-35b --n-gpu-layers 35  # Offload 35 layers
+  jan serve qwen3.5-35b --n-gpu-layers 0   # CPU only
+  ```
+</ParamField>
+
+<ParamField query="ctx-size" type="number" default="4096">
+  Context window size in tokens. Use `0` for model default.
+
+  ```bash
+  jan serve qwen3.5-35b --ctx-size 8192
+  ```
+
+  <Note>
+    Setting `--ctx-size` explicitly disables `--fit`. Use `--fit` to maximize context based on available VRAM.
+  </Note>
+</ParamField>
+
+<ParamField query="fit" type="boolean" default="false">
+  Auto-fit context to available VRAM, maximizing the context window.
+
+  ```bash
+  jan serve qwen3.5-35b --fit
+  ```
+
+  When enabled, Jan automatically determines the largest context size your GPU can handle.
+</ParamField>
+
+<ParamField query="threads" type="number" default="0">
+  CPU threads for inference. Use `0` to auto-detect.
+
+  ```bash
+  jan serve qwen3.5-35b --threads 8
+  ```
+</ParamField>
+
+### Model Type
+
+<ParamField query="embedding" type="boolean" default="false">
+  Treat the model as an embedding model.
+
+  ```bash
+  jan serve nomic-embed-text --embedding
+  ```
+</ParamField>
+
+### Background Mode
+
+<ParamField query="detach" type="boolean" default="false">
+  Run in the background (detach from terminal) and print the PID.
+
+  ```bash
+  jan serve qwen3.5-35b --detach
+  ```
+
+  **Output**:
+  ```json
+  {
+    "pid": 12345,
+    "model_id": "qwen3.5-35b-a3b",
+    "log": "/Users/you/Library/Application Support/Jan/logs/serve.log"
+  }
+  ```
+</ParamField>
+
+<ParamField query="log" type="string">
+  Log file for background mode. Defaults to `<data-folder>/logs/serve.log`.
+
+  ```bash
+  jan serve qwen3.5-35b --detach --log /tmp/jan-serve.log
+  ```
+</ParamField>
+
+### Output Control
+
+<ParamField query="verbose" type="boolean" default="false">
+  Print full server logs (llama.cpp / mlx output) instead of the loading spinner.
+
+  ```bash
+  jan serve qwen3.5-35b --verbose
+  jan serve qwen3.5-35b -v
+  ```
+</ParamField>
+
+## Examples
+
+<CodeGroup>
+```bash Basic usage
+# Pick a model interactively
+jan serve
+
+# Serve a specific model
+jan serve qwen3.5-35b-a3b
+```
+
+```bash Custom port
+jan serve qwen3.5-35b --port 8080
+```
+
+```bash Maximize context
+jan serve qwen3.5-35b --fit
+```
+
+```bash Background mode
+jan serve qwen3.5-35b --detach
+```
+
+```bash CPU only
+jan serve qwen3.5-35b --n-gpu-layers 0
+```
+
+```bash Custom context size
+jan serve qwen3.5-35b --ctx-size 8192
+```
+
+```bash With API key
+jan serve qwen3.5-35b --api-key my-secret-key
+```
+
+```bash Custom GGUF file
+jan serve --model-path /path/to/custom-model.gguf
+```
+
+```bash HuggingFace auto-download
+# Download and serve a model from HuggingFace
+jan serve Qwen/Qwen2.5-35B-Instruct-GGUF
+```
+
+```bash Verbose output
+jan serve qwen3.5-35b --verbose
+```
+</CodeGroup>
+
+## Output
+
+### Success
+
+```
+✓ qwen3.5-35b-a3b ready · http://127.0.0.1:6767
+
+  Endpoint  http://127.0.0.1:6767/v1
+
+  Press Ctrl+C to stop.
+```
+
+The model is now serving at `http://127.0.0.1:6767/v1` with OpenAI-compatible endpoints:
+
+- `/v1/chat/completions`
+- `/v1/completions`
+- `/v1/embeddings` (for embedding models)
+- `/v1/models`
+
+### Error
+
+```
+✗ Failed to load qwen3.5-35b-a3b
+
+Error: model not found in data folder
+```
+
+## OpenAI-Compatible API
+
+Once the model is serving, you can use it with any OpenAI-compatible client:
+
+<CodeGroup>
+```python Python (OpenAI SDK)
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://127.0.0.1:6767/v1",
+    api_key="jan"  # or your custom --api-key
+)
+
+response = client.chat.completions.create(
+    model="qwen3.5-35b-a3b",
+    messages=[
+        {"role": "user", "content": "Hello, how are you?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+```bash cURL
+curl http://localhost:6767/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer jan" \
+  -d '{
+    "model": "qwen3.5-35b-a3b",
+    "messages": [
+      {"role": "user", "content": "Hello, how are you?"}
+    ]
+  }'
+```
+
+```javascript JavaScript (OpenAI SDK)
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:6767/v1',
+  apiKey: 'jan'
+});
+
+const response = await client.chat.completions.create({
+  model: 'qwen3.5-35b-a3b',
+  messages: [
+    { role: 'user', content: 'Hello, how are you?' }
+  ]
+});
+
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+## HuggingFace Auto-Download
+
+Jan can automatically download models from HuggingFace when you specify a repo ID:
+
+```bash
+jan serve Qwen/Qwen2.5-35B-Instruct-GGUF
+```
+
+The CLI will:
+1. Fetch available GGUF files from the repo
+2. Let you pick a quantization interactively
+3. Download the model to your Jan data folder
+4. Serve the model
+
+### Private/Gated Models
+
+Set a HuggingFace token to download private or gated models:
+
+```bash
+export HF_TOKEN="your_token_here"
+jan serve meta-llama/Llama-3.3-70B-Instruct-GGUF
+```
+
+## Background Mode
+
+Run the model server in the background:
+
+```bash
+jan serve qwen3.5-35b --detach
+```
+
+**Output**:
+```json
+{
+  "pid": 12345,
+  "model_id": "qwen3.5-35b-a3b",
+  "log": "/Users/you/Library/Application Support/Jan/logs/serve.log"
+}
+```
+
+To stop the background server:
+
+```bash
+kill 12345
+```
+
+View logs:
+
+```bash
+tail -f "$HOME/Library/Application Support/Jan/logs/serve.log"
+```
+
+## Performance Tips
+
+### Maximize Context Window
+
+Use `--fit` to automatically determine the largest context size your GPU can handle:
+
+```bash
+jan serve qwen3.5-35b --fit
+```
+
+### Optimize for Speed
+
+Offload all layers to GPU:
+
+```bash
+jan serve qwen3.5-35b --n-gpu-layers -1
+```
+
+### Optimize for Memory
+
+Reduce context size and GPU layers:
+
+```bash
+jan serve qwen3.5-35b --ctx-size 2048 --n-gpu-layers 20
+```
+
+### CPU-Only Mode
+
+Run entirely on CPU (no GPU):
+
+```bash
+jan serve qwen3.5-35b --n-gpu-layers 0 --threads 8
+```
+
+## Troubleshooting
+
+### Model Not Found
+
+```
+Error: model not found in data folder
+```
+
+**Solution**: Download the model first using the Jan desktop app, or use a HuggingFace repo ID to auto-download.
+
+### Binary Not Found
+
+```
+✗ llama-server binary not found
+```
+
+**Solution**: Install a backend from Jan's settings, or specify the binary path with `--bin`.
+
+### Out of Memory
+
+```
+Error: failed to allocate memory
+```
+
+**Solution**: Reduce `--ctx-size` or `--n-gpu-layers`, or use `--fit` to auto-size the context.
+
+### Port Already in Use
+
+```
+Error: address already in use
+```
+
+**Solution**: Choose a different port with `--port`, or use `--port 0` to auto-select a free port.
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="Launch Command" icon="rocket" href="/cli/launch">
+    Wire AI agents to local models
+  </Card>
+  <Card title="Commands Reference" icon="terminal" href="/cli/commands">
+    Complete reference for all CLI commands
+  </Card>
+</CardGroup>

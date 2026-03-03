@@ -1,0 +1,265 @@
+---
+title: "Assistants"
+description: "Create and manage custom AI assistants with specialized instructions and parameters"
+---
+
+## What are Assistants?
+
+Assistants are pre-configured AI agents with custom instructions, parameters, and settings. They allow you to:
+
+- Define specialized behavior and tone
+- Set default model parameters
+- Create reusable personas for different tasks
+- Associate assistants with projects
+
+## Creating an Assistant
+
+### Basic Setup
+
+1. Go to **Settings > Assistants**
+2. Click **Add Assistant**
+3. Fill in the basic information:
+
+#### Name
+A descriptive name for your assistant (e.g., "Code Reviewer", "Creative Writer")
+
+#### Avatar
+Choose an emoji or custom image to identify your assistant visually.
+
+#### Description (Optional)
+A brief explanation of what the assistant does.
+
+### Instructions
+
+Instructions define your assistant's behavior, knowledge, and response style.
+
+<CodeGroup>
+```markdown Example: Code Reviewer
+You are an expert code reviewer with deep knowledge of software engineering best practices.
+
+When reviewing code:
+- Focus on readability, maintainability, and performance
+- Identify potential bugs and security issues
+- Suggest specific improvements with examples
+- Be constructive and educational in your feedback
+
+Keep your reviews concise and actionable.
+```
+
+```markdown Example: Customer Support
+You are a friendly and helpful customer support agent.
+
+Your goals:
+- Understand the customer's issue clearly
+- Provide accurate, step-by-step solutions
+- Maintain a professional but warm tone
+- Ask clarifying questions when needed
+
+Always acknowledge the customer's frustration and show empathy.
+```
+</CodeGroup>
+
+<Tip>
+**Dynamic Date Insertion**: Use `{{current_date}}` in your instructions to automatically insert the current date. This helps the model provide time-aware responses.
+
+Example: `Today's date is {{current_date}}. Consider current events when responding.`
+</Tip>
+
+### Parameters
+
+Configure model behavior with custom parameters:
+
+#### Predefined Parameters
+
+Jan provides quick-access buttons for common parameters:
+
+- **Temperature** - Controls randomness (0.0-2.0)
+- **Top P** - Nucleus sampling threshold (0.0-1.0)
+- **Top K** - Limits token selection (1-100)
+- **Max Tokens** - Maximum response length
+- **Presence Penalty** - Reduces repetition (-2.0 to 2.0)
+- **Frequency Penalty** - Discourages repeated phrases (-2.0 to 2.0)
+
+Click a predefined parameter to add it with default values.
+
+#### Custom Parameters
+
+Add your own parameters:
+
+1. Click **Add Parameter** (+)
+2. Enter a **Key** name
+3. Select a **Type**:
+   - **String** - Text value
+   - **Number** - Numeric value
+   - **Boolean** - True/false
+   - **JSON** - Complex object
+4. Enter the **Value**
+
+<Accordion title="Parameter Examples">
+  <CodeGroup>
+  ```json Temperature Settings
+  {
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 40
+  }
+  ```
+  
+  ```json Response Format
+  {
+    "max_tokens": 2000,
+    "stop": ["\n\n", "---"]
+  }
+  ```
+  
+  ```json Creative Writing
+  {
+    "temperature": 1.2,
+    "presence_penalty": 0.6,
+    "frequency_penalty": 0.5
+  }
+  ```
+  </CodeGroup>
+</Accordion>
+
+## Using Assistants
+
+### In New Chats
+
+When starting a new chat:
+
+1. Click the **Assistant dropdown** in the chat input area
+2. Select an assistant from the list
+3. The assistant's instructions and parameters will be applied
+
+### In Projects
+
+Assign a default assistant to a project:
+
+1. Create or edit a project
+2. Select an assistant from the dropdown
+3. All new threads in that project will use this assistant
+
+<Info>
+Project assistants are automatically applied to new conversations, but you can override them by manually selecting a different assistant.
+</Info>
+
+## Managing Assistants
+
+### Editing Assistants
+
+1. Go to **Settings > Assistants**
+2. Click the assistant you want to edit
+3. Modify any field (name, avatar, instructions, parameters)
+4. Click **Save**
+
+<Note>
+Changes to assistants only affect new conversations. Existing threads continue using the original instructions.
+</Note>
+
+### Deleting Assistants
+
+1. Go to **Settings > Assistants**
+2. Click the delete icon next to the assistant
+3. Confirm deletion
+
+<Warning>
+Deleting an assistant removes it from all projects and new chat options. Existing threads are not affected.
+</Warning>
+
+## Assistant Best Practices
+
+### Clear Instructions
+
+- Be specific about the assistant's role and expertise
+- Define the expected behavior and tone
+- Include examples when helpful
+- Keep instructions focused and concise
+
+### Parameter Tuning
+
+<Accordion title="Temperature Guide">
+  - **0.0 - 0.3** - Focused, deterministic (code, facts, analysis)
+  - **0.4 - 0.7** - Balanced (general chat, explanations)
+  - **0.8 - 1.2** - Creative (writing, brainstorming)
+  - **1.3 - 2.0** - Highly creative (experimental, artistic)
+</Accordion>
+
+<Accordion title="Penalty Settings">
+  - **Presence Penalty** - Increases with unique topics (0.6 for diverse responses)
+  - **Frequency Penalty** - Reduces word repetition (0.5 for varied phrasing)
+  - Start with low values and adjust based on results
+</Accordion>
+
+### Testing Assistants
+
+Before using an assistant in production:
+
+1. Create test conversations with typical queries
+2. Verify the tone and style match expectations
+3. Adjust parameters based on response quality
+4. Iterate on instructions for edge cases
+
+## Example Assistants
+
+<AccordionGroup>
+  <Accordion title="Technical Documentation Writer">
+    **Instructions:**
+    ```markdown
+    You are a technical writer creating clear, accurate documentation.
+    
+    Guidelines:
+    - Use active voice and present tense
+    - Break complex topics into digestible sections
+    - Include code examples when relevant
+    - Define technical terms on first use
+    - Structure content with headings and lists
+    
+    Current date: {{current_date}}
+    ```
+    
+    **Parameters:**
+    - temperature: 0.3
+    - max_tokens: 2000
+    - presence_penalty: 0.1
+  </Accordion>
+  
+  <Accordion title="Data Analyst">
+    **Instructions:**
+    ```markdown
+    You are a data analyst helping users understand their data.
+    
+    Approach:
+    - Ask clarifying questions about the data and goals
+    - Provide statistical insights and trends
+    - Suggest visualizations when appropriate
+    - Explain findings in business terms
+    - Highlight actionable recommendations
+    ```
+    
+    **Parameters:**
+    - temperature: 0.4
+    - top_p: 0.85
+    - max_tokens: 1500
+  </Accordion>
+  
+  <Accordion title="Creative Storyteller">
+    **Instructions:**
+    ```markdown
+    You are a creative writer crafting engaging stories.
+    
+    Style:
+    - Use vivid descriptions and sensory details
+    - Develop compelling characters with depth
+    - Create tension and pacing
+    - Show, don't tell
+    - End chapters with hooks to keep readers engaged
+    ```
+    
+    **Parameters:**
+    - temperature: 1.1
+    - presence_penalty: 0.6
+    - frequency_penalty: 0.4
+    - max_tokens: 3000
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,206 @@
+---
+title: Extension System Overview
+description: Learn about Jan's extension architecture and how to build powerful extensions
+---
+
+Jan's extension system allows you to extend the application's functionality by creating custom extensions. Extensions can add new features like custom inference engines, conversational backends, assistant implementations, and more.
+
+## What are Extensions?
+
+Extensions are modular components that integrate with Jan's core APIs. They are packaged as `.tgz` files and can be installed through the Jan interface. Each extension extends the `BaseExtension` class and implements specific interfaces based on its functionality.
+
+## Extension Types
+
+Jan supports several extension types:
+
+<CardGroup cols={2}>
+  <Card title="Inference" icon="brain">
+    Implement custom inference engines for running AI models
+  </Card>
+  <Card title="Conversational" icon="messages">
+    Manage threads, messages, and conversation persistence
+  </Card>
+  <Card title="Assistant" icon="robot">
+    Create and manage AI assistants with custom behavior
+  </Card>
+  <Card title="Engine" icon="engine">
+    Build AI engines for model execution (local or remote)
+  </Card>
+  <Card title="RAG" icon="database">
+    Implement retrieval-augmented generation capabilities
+  </Card>
+  <Card title="Vector DB" icon="vector-square">
+    Add vector database backends for embeddings
+  </Card>
+</CardGroup>
+
+## Extension Architecture
+
+Every extension in Jan follows this structure:
+
+```typescript
+import { BaseExtension, ExtensionTypeEnum } from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  // Extension metadata
+  name: string
+  productName?: string
+  description?: string
+  version?: string
+
+  // Lifecycle methods
+  async onLoad(): Promise<void> {
+    // Initialize your extension
+  }
+
+  onUnload(): void {
+    // Cleanup resources
+  }
+
+  // Optional: Define extension type
+  type(): ExtensionTypeEnum | undefined {
+    return ExtensionTypeEnum.Inference
+  }
+}
+```
+
+## Core Capabilities
+
+### Event System
+
+Extensions can listen to and emit events throughout Jan:
+
+```typescript
+import { events, MessageEvent } from '@janhq/core'
+
+// Listen to events
+events.on(MessageEvent.OnMessageSent, (data) => {
+  console.log('Message sent:', data)
+})
+
+// Emit events
+events.emit(MessageEvent.OnMessageResponse, messageData)
+```
+
+### Settings Management
+
+Extensions can register and manage their own settings:
+
+```typescript
+import { SettingComponentProps } from '@janhq/core'
+
+const settings: SettingComponentProps[] = [
+  {
+    key: 'api_key',
+    title: 'API Key',
+    description: 'Your API key for authentication',
+    controllerType: 'input',
+    controllerProps: {
+      placeholder: 'Enter API key',
+      value: '',
+      type: 'password'
+    }
+  }
+]
+
+await this.registerSettings(settings)
+
+// Get setting value
+const apiKey = await this.getSetting('api_key', '')
+
+// Update settings
+await this.updateSettings([
+  {
+    key: 'api_key',
+    controllerProps: { value: 'new-key' }
+  }
+])
+```
+
+### Model Registration
+
+Extensions can register models with Jan:
+
+```typescript
+import { Model } from '@janhq/core'
+
+const models: Model[] = [
+  {
+    id: 'my-model-id',
+    name: 'My Custom Model',
+    object: 'model',
+    version: '1.0.0',
+    format: 'gguf',
+    sources: [{
+      filename: 'model.gguf',
+      url: 'https://example.com/model.gguf'
+    }],
+    created: Date.now(),
+    description: 'A custom model',
+    settings: {},
+    parameters: {},
+    metadata: {
+      author: 'Me',
+      tags: ['custom'],
+      size: 4_000_000_000
+    },
+    engine: 'llamacpp'
+  }
+]
+
+await this.registerModels(models)
+```
+
+## Extension Lifecycle
+
+1. **Installation**: Extensions are installed as `.tgz` packages
+2. **Loading**: `onLoad()` is called when Jan starts or the extension is enabled
+3. **Active**: Extension responds to events and provides functionality
+4. **Unloading**: `onUnload()` is called when Jan closes or the extension is disabled
+
+## Available Events
+
+### Message Events
+
+- `MessageEvent.OnMessageSent` - Fired when a user sends a message
+- `MessageEvent.OnMessageResponse` - Fired when an assistant responds
+- `MessageEvent.OnMessageUpdate` - Fired when a message is updated
+
+### Inference Events
+
+- `InferenceEvent.OnInferenceStopped` - Fired when inference is stopped
+
+### Download Events
+
+- `DownloadEvent.onFileDownloadUpdate` - Progress updates during downloads
+- `DownloadEvent.onFileDownloadError` - Download errors
+- `DownloadEvent.onModelValidationStarted` - Model validation begins
+
+### App Events
+
+- `AppEvent.onModelImported` - Fired when a model is imported
+
+## Built-in Extensions
+
+Jan includes several built-in extensions:
+
+- **@janhq/conversational-extension** - File system-based conversation storage
+- **@janhq/assistant-extension** - Default AI assistant implementation
+- **@janhq/llamacpp-extension** - llama.cpp inference engine
+- **@janhq/download-extension** - File download management
+- **@janhq/rag-extension** - Retrieval-augmented generation
+- **@janhq/vector-db-extension** - Vector database backend
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Getting Started" icon="rocket" href="/extensions/getting-started">
+    Create your first extension
+  </Card>
+  <Card title="Core API Reference" icon="code" href="/extensions/core-api">
+    Explore the @janhq/core API
+  </Card>
+  <Card title="Building Extensions" icon="hammer" href="/extensions/building-extensions">
+    Package and distribute your extension
+  </Card>
+</CardGroup>

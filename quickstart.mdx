@@ -1,80 +1,338 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get from zero to your first AI chat in under 5 minutes. Download Jan, install a model, and start chatting.
 ---
 
-## Get started in three steps
+# Quickstart
 
-Get your documentation site running locally and make your first customization.
+Get up and running with Jan in minutes. This guide takes you from installation to your first AI conversation with a local model.
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Install Jan">
+    Download Jan for your platform and install it.
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Tabs items={["Windows", "macOS", "Linux"]}>
+      <Tab>
+        1. Download [jan.exe](https://app.jan.ai/download/latest/win-x64)
+        2. Run the installer
+        3. Wait for installation to complete
+        4. Launch Jan
 
-### Step 2: Deploy your changes
+        <Info>
+        Windows 10 or higher required. GPU acceleration available for NVIDIA, AMD, and Intel Arc GPUs.
+        </Info>
+      </Tab>
+      <Tab>
+        1. Download [jan.dmg](https://app.jan.ai/download/latest/mac-universal)
+        2. Open the DMG file
+        3. Drag Jan to your Applications folder
+        4. Launch Jan from Applications
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+        <Info>
+        macOS 13.6+ required. Apple Silicon Macs (M1/M2/M3) get automatic Metal acceleration for better performance.
+        </Info>
+      </Tab>
+      <Tab>
+        **Ubuntu/Debian:**
+        ```bash
+        # Download the .deb package
+        wget https://app.jan.ai/download/latest/linux-amd64-deb
+        
+        # Install
+        sudo dpkg -i jan-linux-amd64-*.deb
+        ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+        **Other distributions (AppImage):**
+        ```bash
+        # Download AppImage
+        wget https://app.jan.ai/download/latest/linux-amd64-appimage
+        
+        # Make executable and run
+        chmod +x jan-linux-x86_64-*.AppImage
+        ./jan-linux-x86_64-*.AppImage
+        ```
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+        <Info>
+        Most Linux distributions supported. GPU acceleration available for NVIDIA (CUDA), AMD (Vulkan), and Intel Arc (Vulkan).
+        </Info>
+      </Tab>
+    </Tabs>
 
-### Step 3: Go live
+    **Alternative Download Options:**
+    - Official website: [jan.ai/download](https://jan.ai/download)
+    - GitHub releases: [github.com/janhq/jan/releases](https://github.com/janhq/jan/releases)
+    - Microsoft Store (Windows)
+    - Flathub (Linux)
+  </Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+  <Step title="Download Your First Model">
+    We recommend starting with **Jan v1**, a 4B parameter model optimized for reasoning and tool calling.
 
-## Next steps
+    1. Open Jan
+    2. Navigate to the **Hub** tab in the left sidebar
+    3. Search for **"Jan v1"**
+    4. Choose a quantization based on your available RAM:
+       - **Q4_K_M** (2.5 GB) - Good balance for most users
+       - **Q8_0** (4.28 GB) - Best quality if you have 16GB+ RAM
+    5. Click **Download**
+    6. Wait for the download to complete
 
-Now that you have your docs running, explore these key features:
+    <Note>
+    Jan v1 achieves 91.1% accuracy on SimpleQA and excels at tool calling, making it perfect for web search and reasoning tasks.
+    </Note>
 
-<CardGroup cols={2}>
+    **Other Popular Models:**
+    - **Llama 3.2 3B** - Fast, general-purpose model (2GB)
+    - **Gemma 2 2B** - Google's efficient model (1.6GB)
+    - **Qwen 2.5 7B** - Excellent for coding and reasoning (4.5GB)
+    - **DeepSeek R1** - Advanced reasoning model (8GB+)
+  </Step>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+  <Step title="Start Your First Chat">
+    Once your model is downloaded, you're ready to chat!
+
+    1. Click the **New Chat** button (pencil icon) in the top-left
+    2. In the input field at the bottom, click the model dropdown
+    3. Select **Jan v1** (or your chosen model)
+    4. Type your first message and press Enter
+
+    **Try these prompts:**
+    ```
+    Explain quantum computing in simple terms
+    ```
+    ```
+    Help me write a Python function to sort a list
+    ```
+    ```
+    What are the pros and cons of electric vehicles?
+    ```
+
+    <Tip>
+    The first response may take a moment as the model loads into memory. Subsequent responses will be faster.
+    </Tip>
+  </Step>
+</Steps>
+
+## What's Next?
+
+You're now chatting with AI completely offline! Here are some powerful features to explore:
+
+### Enable Web Search (MCP)
+
+Give Jan v1 access to current web information with real-time search:
+
+1. Go to **Settings** → **MCP**
+2. Add the Serper MCP server (includes 2,500 free searches)
+3. Enable tools in your chat
+4. Ask Jan to search the web for current information
+
+<Card title="Serper MCP Tutorial" icon="magnifying-glass" href="https://jan.ai/docs/desktop/mcp-examples/search/serper">
+  Complete guide to enabling web search in Jan with 2,500 free searches per month.
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+### Manage Your Conversations
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+Jan organizes all your chats into threads for easy management:
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+**View Chat History:**
+- Left sidebar shows all conversations
+- **Favorites**: Pin important threads by clicking the star icon
+- **Recents**: Quick access to recently used threads
 
-</CardGroup>
+**Rename Conversations:**
+1. Hover over a conversation in the sidebar
+2. Click the three dots (...) menu
+3. Select "Rename"
+4. Enter a descriptive title
+
+**Delete Threads:**
+1. Hover over a thread
+2. Click three dots (...)
+3. Select "Delete"
+
+<Warning>
+Thread deletion is permanent with no undo option. Make sure you want to delete before confirming.
+</Warning>
+
+### Create Custom Assistants
+
+Customize how models respond to match your workflow:
+
+1. Click the **Assistant** tab in the left sidebar
+2. Click **Create New Assistant**
+3. Give it a name (e.g., "Code Reviewer", "Writing Assistant")
+4. Add custom instructions:
+   ```
+   You are a senior software engineer specializing in Python.
+   Always include code examples and best practices.
+   Format code blocks with proper syntax highlighting.
+   ```
+5. Save and select your assistant in any chat
+
+<Info>
+Assistant instructions work across all models, so you can switch models while keeping the same personality and behavior.
+</Info>
+
+### Adjust Model Parameters
+
+Fine-tune model behavior for different tasks:
+
+1. In any chat, click the **Gear icon** next to the model name
+2. Adjust these key parameters:
+   - **Temperature** (0.0-1.0): Lower = more focused, higher = more creative
+   - **Max Tokens**: Maximum length of responses
+   - **Top P**: Controls diversity of word selection
+   - **Frequency Penalty**: Reduces repetition
+
+**Recommended Settings:**
+- **Creative Writing**: Temperature 0.8-1.0
+- **Code Generation**: Temperature 0.2-0.4
+- **Factual Q&A**: Temperature 0.1-0.3
+- **General Chat**: Temperature 0.7 (default)
+
+### Download More Models
+
+Explore thousands of models from HuggingFace:
+
+1. Go to the **Hub** tab
+2. Browse by category or search for specific models
+3. Popular categories:
+   - **General Chat**: Llama, Gemma, Mistral
+   - **Coding**: Qwen Coder, DeepSeek Coder
+   - **Reasoning**: DeepSeek R1, Jan v1
+   - **Small & Fast**: Phi-3, TinyLlama
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+**Memory Requirements:**
+- 8GB RAM → up to 3B parameter models
+- 16GB RAM → up to 7B parameter models
+- 32GB RAM → up to 13B parameter models
+
+With GPU acceleration, you can run larger models with less system RAM.
 </Note>
+
+### Connect Cloud Models (Optional)
+
+Combine local and cloud AI in one interface:
+
+1. Open any chat
+2. Click the model dropdown
+3. Select a cloud provider (OpenAI, Anthropic, Groq, Mistral)
+4. Click the **Gear icon** next to the provider name
+5. Enter your API key
+6. Start chatting with GPT-4, Claude, or other cloud models
+
+**Supported Cloud Providers:**
+- **OpenAI**: GPT-4, GPT-4 Turbo, GPT-3.5
+- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Opus/Haiku
+- **Groq**: Ultra-fast inference with Llama, Mixtral
+- **Mistral AI**: Mistral Large, Medium, Small
+- **Cohere**: Command R+, Command R
+- **Google**: Gemini Pro, Gemini Flash
+
+<Card title="Remote Models Guide" icon="cloud" href="https://jan.ai/docs/desktop/remote-models/openai">
+  Detailed setup instructions for connecting cloud AI providers.
+</Card>
+
+### Use the Local API Server
+
+Jan runs an OpenAI-compatible API server at `localhost:1337`:
+
+```bash
+# Example: Chat completion
+curl http://localhost:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "jan-v1",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+Use this to integrate Jan with:
+- Continue.dev (VS Code AI coding assistant)
+- Tabby (AI code completion)
+- n8n (workflow automation)
+- LLMCord (Discord bot)
+- Custom applications
+
+<Card title="API Server Examples" icon="code" href="https://jan.ai/docs/desktop/server-examples/continue-dev">
+  See real-world examples of integrating Jan's API with popular tools.
+</Card>
+
+## Troubleshooting
+
+### Model Won't Load
+- **Check RAM**: Ensure you have enough memory for the model size
+- **GPU Settings**: Go to Settings → Hardware → GPUs to enable/disable GPU acceleration
+- **Restart Jan**: Sometimes a fresh start helps
+
+### Slow Performance
+- **Enable GPU acceleration** (Settings → Hardware)
+- **Use smaller models** (3B-7B instead of 13B+)
+- **Lower quantization** (Q4 instead of Q8)
+- **Close other applications** to free up RAM
+
+### Download Issues
+- **Check internet connection**
+- **Verify disk space** (10GB+ free recommended)
+- **Try different mirror**: Some models have multiple download sources
+- **Resume failed downloads**: Jan automatically resumes interrupted downloads
+
+### GPU Not Detected
+
+<Tabs items={["NVIDIA", "AMD/Intel Arc", "Apple Silicon"]}>
+  <Tab>
+    1. Install [NVIDIA drivers](https://www.nvidia.com/en-us/drivers/) (version 470.63.01+)
+    2. Install [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) (version 11.7+)
+    3. Verify installation:
+       ```bash
+       nvidia-smi
+       nvcc --version
+       ```
+    4. Enable in Jan: Settings → Hardware → GPUs → Toggle ON
+  </Tab>
+  <Tab>
+    1. Ensure Vulkan support is installed (usually included with GPU drivers)
+    2. Enable in Jan: Settings → Hardware → GPUs → Toggle ON
+    3. Select Vulkan backend: Settings → Local Engine → Llama.cpp → Backend → Vulkan
+  </Tab>
+  <Tab>
+    Metal acceleration is automatic on Apple Silicon Macs (M1/M2/M3). No configuration needed.
+    
+    Intel-based Macs run on CPU only without GPU acceleration.
+  </Tab>
+</Tabs>
+
+<Card title="Full Troubleshooting Guide" icon="life-ring" href="https://jan.ai/docs/desktop/troubleshooting">
+  Comprehensive troubleshooting documentation for common issues.
+</Card>
+
+## Getting Help
+
+If you run into issues:
+
+1. Check the [troubleshooting docs](https://jan.ai/docs/desktop/troubleshooting)
+2. Search [GitHub issues](https://github.com/janhq/jan/issues)
+3. Ask in [Discord #🆘|jan-help](https://discord.gg/FTk2MvZwJH) channel
+4. Include:
+   - Your OS and version
+   - Jan version (Help → About)
+   - Error messages or logs
+   - Steps to reproduce
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="gear" href="/installation">
+    Platform-specific installation details and GPU setup instructions.
+  </Card>
+  <Card title="Model Parameters" icon="sliders" href="https://jan.ai/docs/desktop/model-parameters">
+    Learn how to fine-tune model behavior for different use cases.
+  </Card>
+  <Card title="MCP Integration" icon="puzzle" href="https://jan.ai/docs/desktop/mcp">
+    Enable agentic capabilities with web search, tools, and integrations.
+  </Card>
+  <Card title="API Reference" icon="code" href="https://jan.ai/api-reference">
+    Complete API documentation for building integrations.
+  </Card>
+</CardGroup>

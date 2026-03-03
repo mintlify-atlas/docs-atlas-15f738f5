@@ -1,0 +1,235 @@
+---
+title: Troubleshooting
+description: Solutions for common issues and optimization tips to help you get Jan running smoothly.
+---
+
+# Troubleshooting
+
+This guide covers common issues you might encounter with Jan and how to resolve them.
+
+## Getting Error Logs
+
+Error logs are essential for troubleshooting. You can access them in two ways:
+
+### Through Jan Interface
+
+1. Open **System Monitor** in the footer
+2. Choose **App Log**
+
+### Through Terminal
+
+**Application Logs:**
+```bash
+# macOS/Linux
+tail -n 50 ~/Library/Application\ Support/Jan/data/logs/app.log
+
+# Linux (alternative path)
+tail -n 50 ~/.config/Jan/logs/app.log
+```
+
+**Server Logs:**
+```bash
+tail -n 50 ~/Library/Application\ Support/Jan/data/logs/cortex.log
+```
+
+<Warning>
+Redact any private or sensitive information when sharing logs. We retain logs for only 24 hours.
+</Warning>
+
+## Common Issues
+
+### Broken Build
+
+If Jan is stuck in a broken build after installation:
+
+<Tabs>
+  <Tab title="Mac">
+    1. **Uninstall** Jan
+    2. **Delete** Application Data:
+    ```bash
+    rm -rf ~/Library/Application\ Support/Jan
+    ```
+    3. For versions before `0.4.2`, kill background processes:
+    ```bash
+    ps aux | grep nitro
+    kill -9 <PID>
+    ```
+    4. **Download** the [latest version](https://jan.ai/)
+  </Tab>
+  
+  <Tab title="Windows">
+    1. **Uninstall** Jan via [Control Panel](https://support.microsoft.com/en-us/windows/uninstall-or-remove-apps-and-programs-in-windows-4b55f974-2cc6-2d2b-d092-5905080eaf98)
+    2. **Delete** Application Data:
+    ```cmd
+    cd C:\Users\%USERNAME%\AppData\Roaming
+    rmdir /S Jan
+    ```
+    3. For versions before `0.4.2`, kill background processes:
+    ```bash
+    tasklist | findstr "nitro"
+    taskkill /F /PID <PID>
+    ```
+    4. **Download** the [latest version](https://jan.ai/)
+  </Tab>
+  
+  <Tab title="Linux">
+    1. **Uninstall** Jan:
+    ```bash
+    # For Debian/Ubuntu
+    sudo apt-get remove Jan
+    # For AppImage: Delete the .AppImage file
+    ```
+    2. **Delete** Application Data:
+    ```bash
+    rm -rf ~/.config/Jan
+    ```
+    3. For versions before `0.4.2`, kill background processes:
+    ```bash
+    ps aux | grep nitro
+    kill -9 <PID>
+    ```
+    4. **Download** the [latest version](https://jan.ai/)
+  </Tab>
+</Tabs>
+
+<Info>
+Ensure Jan is completely removed from all user accounts on shared devices before reinstalling.
+</Info>
+
+### NVIDIA GPU Not Working
+
+If Jan doesn't utilize your NVIDIA GPU:
+
+#### 1. Verify Hardware Detection
+
+**Windows:**
+- Right-click desktop → NVIDIA Control Panel
+- Or check Device Manager → Display Adapters
+
+**Linux:**
+```bash
+lspci | grep -i nvidia
+```
+
+#### 2. Install Required Components
+
+**NVIDIA Driver (470.63.01 or higher):**
+1. Install [NVIDIA Driver](https://www.nvidia.com/en-us/drivers/)
+2. Verify: `nvidia-smi`
+
+**CUDA Toolkit (11.7 or higher):**
+1. Install [CUDA toolkit](https://developer.nvidia.com/cuda-downloads)
+2. Verify: `nvcc --version`
+
+**Linux Additional Setup:**
+```bash
+sudo apt update
+sudo apt install gcc-11 g++-11 cpp-11
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64
+```
+
+#### 3. Enable GPU Acceleration
+
+1. Open **Settings** > **Hardware**
+2. Verify **GPU Acceleration** is enabled
+3. Check selected GPU(s) in **System Monitor** (footer)
+
+#### 4. Check GPU Settings
+
+1. Go to **Settings** > **General** > **Data Folder**
+2. Click **Open Containing Folder**
+3. Open `settings.json`
+
+Verify configuration:
+```json
+{
+  "run_mode": "gpu",
+  "nvidia_driver": {
+    "exist": true,
+    "version": "531.18"
+  },
+  "cuda": {
+    "exist": true,
+    "version": "12"
+  },
+  "gpus": [
+    {
+      "id": "0",
+      "vram": "12282"
+    }
+  ]
+}
+```
+
+### "Failed to Fetch" or "Something's Amiss" Errors
+
+**1. Check System Requirements**
+- Verify your device meets [minimum requirements](/help/system-requirements)
+- RAM: Choose models using less than 80% of available RAM
+  - 8GB systems: Models under 6GB
+  - 16GB systems: Models under 13GB
+
+**2. Adjust Model Parameters**
+- Check `ngl` (GPU layers) setting in **Engine Settings**
+- Start with lower values and increase gradually
+
+**3. Check Port Conflicts**
+
+If logs show "Bind address failed":
+```bash
+# macOS
+netstat -an | grep 39291
+
+# Windows
+netstat -ano | find "39291"
+tasklist /fi "PID eq 39291"
+
+# Linux
+netstat -anpe | grep "39291"
+```
+
+Default Jan ports:
+- API Server: `1337`
+- Documentation: `3001`
+
+**4. Factory Reset**
+
+1. Go to **Settings** > **Advanced Settings**
+2. Click **Reset** under Reset To Factory Settings
+
+<Warning>
+This deletes all chat history, models, and settings.
+</Warning>
+
+**5. Clean Installation**
+
+- Uninstall Jan and delete data folders
+- Download the [latest version](https://jan.ai/)
+
+### Permission Denied Error
+
+If you see permission errors during installation:
+
+```bash
+sudo chown -R $(whoami) ~/.npm
+```
+
+### OpenAI "Unexpected Token" Error
+
+**1. API Key Setup**
+- Get a valid key from [OpenAI's platform](https://platform.openai.com/)
+- Ensure sufficient credits and permissions
+
+**2. Regional Access**
+- Use a VPN if in a restricted region
+- Verify network access to OpenAI endpoints
+
+## Need More Help?
+
+1. Copy your [error logs](#getting-error-logs)
+2. Visit our [Discord](https://discord.gg/FTk2MvZwJH)
+3. Post in **#🆘|jan-help** channel
+
+<Info>
+Check logs before sharing. We retain logs for only 24 hours.
+</Info>

@@ -1,0 +1,291 @@
+---
+title: Running Local LLMs
+description: Run AI models completely offline on your own hardware with Jan's llama.cpp integration.
+---
+
+## Overview
+
+Jan lets you run large language models (LLMs) entirely on your own computer using [llama.cpp](https://github.com/ggerganov/llama.cpp), an open-source inference engine. All models run locally with complete privacy - your conversations never leave your device.
+
+<Note>
+  Local models use your computer's RAM and processing power. Choose models that match your hardware capabilities for the best experience.
+</Note>
+
+## Why Run Models Locally?
+
+<CardGroup cols={2}>
+  <Card title="Complete Privacy" icon="lock">
+    Your conversations and data never leave your computer. Perfect for sensitive work or personal projects.
+  </Card>
+  <Card title="Zero Costs" icon="dollar-sign">
+    No monthly subscriptions or per-token API fees. Run unlimited conversations for free.
+  </Card>
+  <Card title="Offline Capable" icon="wifi-off">
+    Work anywhere without internet access once models are downloaded.
+  </Card>
+  <Card title="Full Control" icon="sliders">
+    Customize model behavior, parameters, and performance settings to match your needs.
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+### Download Your First Model
+
+The easiest way to get started is through Jan's built-in Hub:
+
+<Steps>
+  <Step title="Open the Hub">
+    Navigate to the **Hub** tab in Jan's interface.
+  </Step>
+  
+  <Step title="Browse Models">
+    Browse available models or search for specific ones. Jan indicates if a model might be "Slow on your device" or requires "Not enough RAM" based on your system.
+  </Step>
+  
+  <Step title="Download">
+    Click **Download** on your chosen model. GGUF format models are optimized for local inference.
+  </Step>
+</Steps>
+
+<Tip>
+  Start with **Jan v1** (4B parameters) - it's optimized for reasoning and tool calling while running smoothly on most hardware.
+</Tip>
+
+### Import from HuggingFace
+
+You can import models directly from HuggingFace:
+
+1. Visit [HuggingFace Models](https://huggingface.co/models) and find a GGUF model
+2. Copy the model ID (e.g., `TheBloke/Mistral-7B-v0.1-GGUF`)
+3. Paste it into Jan's Hub search bar
+4. Select your preferred quantization and download
+
+<Warning>
+  Some models require a HuggingFace Access Token. Add your token in **Settings > Model Providers > Hugging Face** before importing.
+</Warning>
+
+### Import Local GGUF Files
+
+If you already have GGUF model files:
+
+1. Go to **Settings > Model Providers > Llama.cpp**
+2. Click **Import** and select your GGUF file(s)
+3. Choose import method:
+   - **Link Files**: Creates symbolic links (saves disk space)
+   - **Duplicate**: Copies files to Jan's directory (safer for external drives)
+4. Click **Import** to complete
+
+## Model Formats & Quantization
+
+### GGUF Format
+
+All local models in Jan use the GGUF format, which is optimized for efficient inference on consumer hardware. GGUF files package the model weights and configuration in a single file.
+
+### Quantization Explained
+
+Quantization reduces model size by using lower precision numbers. This trades some accuracy for significant memory savings:
+
+| Quantization | Size Impact | Quality | Best For |
+|--------------|-------------|---------|----------|
+| **Q4_K_M** | Smallest | Good | Limited RAM, fastest inference |
+| **Q5_K_M** | Medium | Better | Balanced performance |
+| **Q6_K** | Larger | Great | More RAM available |
+| **Q8_0** | Largest | Excellent | Maximum quality, plenty of RAM |
+
+<Tip>
+  For most users, **Q4_K_M** provides the best balance of quality and performance. Upgrade to Q8_0 if you have sufficient RAM and want maximum accuracy.
+</Tip>
+
+## Hardware Acceleration
+
+### GPU Support
+
+Jan can offload model layers to your GPU for dramatically faster inference:
+
+- **NVIDIA**: CUDA support (CUDA 11.7 or 12.0)
+- **AMD**: Vulkan backend support
+- **Apple Silicon**: Native Metal acceleration (M1/M2/M3/M4)
+- **Intel Arc**: Vulkan backend support
+
+### Configuring GPU Layers
+
+Control how many model layers run on your GPU:
+
+1. In a chat, click the **gear icon** next to your model
+2. Adjust the **GPU Layers** slider
+3. Higher values = faster inference (but uses more VRAM)
+
+<Note>
+  Start with maximum GPU layers and reduce only if you encounter out-of-memory errors.
+</Note>
+
+## Model Management
+
+### View Downloaded Models
+
+Access all your models at **Settings > Model Providers > Llama.cpp**. Each model shows:
+- Name and version
+- File size
+- Current status (downloaded/downloading)
+- Configuration options
+
+### Configure Model Settings
+
+Click the **gear icon** next to any model to adjust:
+
+- **Context Length**: How much conversation history the model remembers
+- **GPU Layers**: Hardware acceleration settings
+- **Temperature**: Response creativity (0.1 = focused, 1.0 = creative)
+- **Prompt Template**: Chat format used by the model
+
+### Enable Model Capabilities
+
+Click the **edit button** next to a model to enable:
+
+- **Vision**: Analyze images you share in conversations
+- **Tools**: Enable web search, code execution, and external tools
+- **Embeddings**: Generate vector representations of text
+- **Reasoning**: Step-by-step thinking for complex problems
+
+### Delete Models
+
+1. Go to **Settings > Model Providers > Llama.cpp**
+2. Find the model you want to remove
+3. Click the three dots and select **Delete Model**
+
+<Warning>
+  Deleting a model removes it from your system. You'll need to re-download it to use it again.
+</Warning>
+
+## Advanced: Manual Model Setup
+
+For advanced users who want to add custom models:
+
+<Steps>
+  <Step title="Navigate to Jan Data Folder">
+    See [Data Folder documentation](/desktop/data-folder) for the location on your OS.
+  </Step>
+  
+  <Step title="Create Model Directory">
+    In the `models` folder, create a new directory for your model.
+  </Step>
+  
+  <Step title="Add Files">
+    Place your `model.gguf` file and create a `model.json` configuration file.
+  </Step>
+  
+  <Step title="Configure model.json">
+    Define model settings, parameters, and metadata. See example below.
+  </Step>
+</Steps>
+
+### Example model.json
+
+```json
+{
+  "sources": [
+    {
+      "filename": "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf",
+      "url": "https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+    }
+  ],
+  "id": "tinyllama-1.1b",
+  "object": "model",
+  "name": "TinyLlama Chat 1.1B Q4",
+  "version": "1.0",
+  "description": "TinyLlama is a tiny model with only 1.1B parameters.",
+  "format": "gguf",
+  "settings": {
+    "ctx_len": 4096,
+    "prompt_template": "<|system|>\n{system_message}<|user|>\n{prompt}<|assistant|>",
+    "llama_model_path": "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+  },
+  "parameters": {
+    "temperature": 0.7,
+    "top_p": 0.95,
+    "stream": true,
+    "max_tokens": 2048,
+    "stop": [],
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+  },
+  "metadata": {
+    "author": "TinyLlama",
+    "tags": ["Tiny", "Foundation Model"],
+    "size": 669000000
+  },
+  "engine": "nitro"
+}
+```
+
+## Performance Optimization
+
+### For Faster Inference
+
+- Use GPU acceleration (maximize GPU Layers)
+- Enable **Continuous Batching** in llama.cpp settings
+- Close memory-intensive applications
+- Choose smaller quantizations (Q4_K_M)
+
+### For Better Quality
+
+- Use larger quantizations (Q8_0)
+- Increase context length for longer conversations
+- Adjust temperature (lower = more focused)
+- Enable reasoning capabilities for complex tasks
+
+### For Limited Hardware
+
+- Choose smaller models (1B-7B parameters)
+- Use aggressive quantization (Q4_K_M)
+- Reduce context length to 2048-4096 tokens
+- Offload fewer layers to GPU
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Model won't load">
+    - Verify you have enough RAM (check model size)
+    - Try a different llama.cpp backend in Settings
+    - Ensure the GGUF file isn't corrupted
+    - Check Jan's logs for specific errors
+  </Accordion>
+  
+  <Accordion title="Very slow responses">
+    - Increase GPU Layers (if you have a compatible GPU)
+    - Verify the correct backend is selected (CUDA for NVIDIA, Metal for Apple)
+    - Close other memory-intensive applications
+    - Try a smaller model or lower quantization
+  </Accordion>
+  
+  <Accordion title="Out of memory errors">
+    - Reduce Context Size in model settings
+    - Lower GPU Layers setting
+    - Switch to a smaller quantization (Q4_K_M instead of Q8_0)
+    - Try a smaller model
+  </Accordion>
+  
+  <Accordion title="Model responses are repetitive">
+    - Increase Temperature setting (try 0.8-1.0)
+    - Adjust Repeat Penalty (try 1.1-1.3)
+    - Enable Presence Penalty
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Model Parameters" icon="sliders" href="/features/model-parameters">
+    Fine-tune how your models think and respond
+  </Card>
+  <Card title="Local API Server" icon="server" href="/features/api-server">
+    Use your local models via OpenAI-compatible API
+  </Card>
+  <Card title="MCP Integration" icon="plug" href="/features/mcp-integration">
+    Connect models to external tools and data sources
+  </Card>
+  <Card title="llama.cpp Engine" icon="gear" href="/docs/desktop/llama-cpp">
+    Deep dive into engine configuration
+  </Card>
+</CardGroup>

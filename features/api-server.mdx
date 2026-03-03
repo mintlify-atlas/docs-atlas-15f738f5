@@ -1,0 +1,503 @@
+---
+title: Local API Server
+description: Run an OpenAI-compatible API server locally at localhost:1337 for integrating your local models with other applications.
+---
+
+## Overview
+
+Jan includes a built-in API server that exposes your local models through an OpenAI-compatible REST API. This lets you integrate Jan's local models into your own applications, scripts, and tools using the familiar OpenAI API format.
+
+<Info>
+  The local API server runs at `http://127.0.0.1:1337` by default and requires an API key for authentication.
+</Info>
+
+## Why Use the Local API Server?
+
+<CardGroup cols={2}>
+  <Card title="Drop-in Replacement" icon="code">
+    Use as a direct replacement for OpenAI's API in your existing applications.
+  </Card>
+  <Card title="Private & Offline" icon="shield">
+    All processing happens locally - no data sent to external servers.
+  </Card>
+  <Card title="Zero API Costs" icon="dollar-sign">
+    Run unlimited requests without per-token charges or rate limits.
+  </Card>
+  <Card title="Full Control" icon="wrench">
+    Choose exactly which models to expose and configure server behavior.
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+<Steps>
+  <Step title="Open Server Settings">
+    Navigate to **Settings > Local API Server** in Jan.
+  </Step>
+  
+  <Step title="Set API Key">
+    Enter a custom API key (e.g., `secret-key-123`). This is required for all API requests.
+    
+    <Warning>
+      Store this key securely - it controls access to your local models.
+    </Warning>
+  </Step>
+  
+  <Step title="Start the Server">
+    Click **Start Server**. Wait for the logs to show:
+    ```
+    JAN API listening at http://127.0.0.1:1337
+    ```
+  </Step>
+  
+  <Step title="Test the Connection">
+    Open a terminal and run:
+    
+    ```bash
+    curl http://127.0.0.1:1337/v1/models \
+      -H "Authorization: Bearer secret-key-123"
+    ```
+    
+    You should see a list of your available models.
+  </Step>
+</Steps>
+
+## Making API Requests
+
+### Chat Completions
+
+The primary endpoint for conversational AI:
+
+```bash
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "jan-v1-4b",
+    "messages": [
+      {"role": "user", "content": "Explain quantum computing in simple terms"}
+    ]
+  }'
+```
+
+**Response**:
+```json
+{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "jan-v1-4b",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Quantum computing uses quantum mechanics..."
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 13,
+    "completion_tokens": 87,
+    "total_tokens": 100
+  }
+}
+```
+
+### Streaming Responses
+
+Get real-time token-by-token responses:
+
+```bash
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "jan-v1-4b",
+    "messages": [{"role": "user", "content": "Write a poem"}],
+    "stream": true
+  }'
+```
+
+### List Available Models
+
+```bash
+curl http://127.0.0.1:1337/v1/models \
+  -H "Authorization: Bearer secret-key-123"
+```
+
+### Model Parameters
+
+Control model behavior with standard OpenAI parameters:
+
+```json
+{
+  "model": "jan-v1-4b",
+  "messages": [{"role": "user", "content": "Hello!"}],
+  "temperature": 0.7,
+  "max_tokens": 2048,
+  "top_p": 0.95,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "stop": ["\n\n"]
+}
+```
+
+## Server Configuration
+
+### Network Settings
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| **Server Host** | `127.0.0.1` | Bind address for the server |
+| **Server Port** | `1337` | Port number for the API |
+| **API Prefix** | `/v1` | Base path for all endpoints |
+
+#### Server Host Options
+
+- **`127.0.0.1`** (Recommended): Server only accessible from your computer. Most secure for personal use.
+- **`0.0.0.0`**: Server accessible from other devices on your network. Use cautiously.
+
+<Warning>
+  Using `0.0.0.0` exposes your API to your local network. Ensure you trust all devices on the network and use a strong API key.
+</Warning>
+
+#### Changing the Port
+
+If port 1337 conflicts with another service:
+
+1. Enter a different port (e.g., `8000`, `3000`, `5000`)
+2. Restart the server
+3. Update your application to use the new port
+
+### Security Settings
+
+#### API Key (Required)
+
+The API key authenticates all requests:
+
+```bash
+# Include in Authorization header
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  # ...
+```
+
+**Best Practices**:
+- Use a strong, random key (at least 20 characters)
+- Don't commit keys to version control
+- Rotate keys periodically
+- Use environment variables in applications:
+  ```bash
+  export JAN_API_KEY="your-secret-key"
+  ```
+
+#### Trusted Hosts
+
+Restrict which domains can access your server:
+
+1. Enter comma-separated hostnames (e.g., `localhost,myapp.local`)
+2. Empty = allow all (not recommended for `0.0.0.0`)
+3. Restart server to apply changes
+
+### Advanced Settings
+
+#### CORS (Cross-Origin Resource Sharing)
+
+- **Enabled** (default): Web applications from different origins can access the API
+- **Disabled**: Only same-origin requests allowed
+
+<Tip>
+  Keep CORS enabled if you're building web applications that need to call the API. Disable for command-line tools or server-side applications only.
+</Tip>
+
+#### Verbose Server Logs
+
+- **Enabled** (default): Detailed logs of all requests and responses
+- **Disabled**: Minimal logging
+
+Logs show:
+- Incoming requests with full payloads
+- Model loading/unloading events
+- Token generation statistics
+- Error details
+
+<Info>
+  Keep verbose logging enabled during development for easier debugging. Disable in production for cleaner logs.
+</Info>
+
+## Integration Examples
+
+### Python with OpenAI SDK
+
+```python
+from openai import OpenAI
+
+# Point to local Jan server
+client = OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+response = client.chat.completions.create(
+    model="jan-v1-4b",
+    messages=[
+        {"role": "user", "content": "Hello, how are you?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+### Node.js with OpenAI SDK
+
+```javascript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:1337/v1',
+  apiKey: 'secret-key-123',
+});
+
+const response = await client.chat.completions.create({
+  model: 'jan-v1-4b',
+  messages: [{ role: 'user', content: 'Hello!' }],
+});
+
+console.log(response.choices[0].message.content);
+```
+
+### LangChain Integration
+
+```python
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123",
+    model="jan-v1-4b"
+)
+
+response = llm.invoke("Explain machine learning")
+print(response.content)
+```
+
+### Continue.dev (VS Code)
+
+Configure Continue to use Jan's local models:
+
+```json
+// .continue/config.json
+{
+  "models": [
+    {
+      "title": "Jan v1",
+      "provider": "openai",
+      "model": "jan-v1-4b",
+      "apiBase": "http://127.0.0.1:1337/v1",
+      "apiKey": "secret-key-123"
+    }
+  ]
+}
+```
+
+### Cursor IDE
+
+Add Jan as a model provider in Cursor settings:
+
+1. Open Cursor Settings
+2. Go to Models
+3. Add Custom Model:
+   - **API Base URL**: `http://127.0.0.1:1337/v1`
+   - **API Key**: `secret-key-123`
+   - **Model**: `jan-v1-4b`
+
+## Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Code Editors" icon="code">
+    Integrate with VS Code, Cursor, or other editors for AI-powered coding assistance.
+  </Card>
+  
+  <Card title="Custom Applications" icon="laptop-code">
+    Build your own applications that leverage local AI without cloud dependencies.
+  </Card>
+  
+  <Card title="Automation Scripts" icon="robot">
+    Create scripts that use AI for data processing, content generation, or analysis.
+  </Card>
+  
+  <Card title="Testing & Development" icon="flask">
+    Test AI integrations locally before deploying to production with cloud APIs.
+  </Card>
+  
+  <Card title="Discord/Slack Bots" icon="message-circle">
+    Power chatbots with local models for private community servers.
+  </Card>
+  
+  <Card title="Data Analysis" icon="chart-bar">
+    Process sensitive data with AI while keeping everything on your machine.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection Refused">
+    **Symptoms**: Can't connect to `http://127.0.0.1:1337`
+    
+    **Solutions**:
+    - Verify the server is running (check Jan UI)
+    - Confirm you're using the correct host and port
+    - Check if another application is using port 1337
+    - Try restarting the server in Jan
+  </Accordion>
+  
+  <Accordion title="401 Unauthorized">
+    **Symptoms**: Authentication errors
+    
+    **Solutions**:
+    - Verify API key is included in `Authorization: Bearer` header
+    - Check for typos in the API key
+    - Ensure no extra spaces or newlines in the key
+    - Confirm the key matches what's set in Jan settings
+  </Accordion>
+  
+  <Accordion title="404 Model Not Found">
+    **Symptoms**: Model ID errors
+    
+    **Solutions**:
+    - List available models: `curl http://127.0.0.1:1337/v1/models`
+    - Use exact model ID from the list
+    - Ensure the model is downloaded in Jan
+    - Check for typos in model name
+  </Accordion>
+  
+  <Accordion title="CORS Errors (Browser)">
+    **Symptoms**: Cross-origin errors in web applications
+    
+    **Solutions**:
+    - Enable CORS in Jan's API Server settings
+    - Restart the server after enabling
+    - Check browser console for specific CORS errors
+    - Verify your domain is in Trusted Hosts (if set)
+  </Accordion>
+  
+  <Accordion title="Slow Responses">
+    **Symptoms**: API taking a long time to respond
+    
+    **Solutions**:
+    - Check model's GPU layers setting (increase for faster inference)
+    - Reduce max_tokens in request
+    - Close other applications using GPU/RAM
+    - Try a smaller/faster model
+    - Check verbose logs for performance bottlenecks
+  </Accordion>
+  
+  <Accordion title="Can't Access from Other Devices">
+    **Symptoms**: Network devices can't reach the API
+    
+    **Solutions**:
+    - Change Server Host to `0.0.0.0`
+    - Restart the server
+    - Ensure firewall allows connections on the port
+    - Use your computer's local IP (not 127.0.0.1) from other devices
+    - Check that devices are on the same network
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Environment Variables
+
+Configure the server via environment variables:
+
+```bash
+export JAN_API_HOST="0.0.0.0"
+export JAN_API_PORT="8000"
+export JAN_API_KEY="my-secure-key"
+```
+
+### Custom API Prefix
+
+Change the base path for all endpoints:
+
+1. Set **API Prefix** to your desired path (e.g., `/api`, `/jan`, or empty)
+2. Update your applications:
+   - `/v1` → `http://127.0.0.1:1337/v1/chat/completions`
+   - `/api` → `http://127.0.0.1:1337/api/chat/completions`
+   - Empty → `http://127.0.0.1:1337/chat/completions`
+
+### Multiple Model Serving
+
+The API automatically exposes all downloaded models in Jan. List them:
+
+```bash
+curl http://127.0.0.1:1337/v1/models \
+  -H "Authorization: Bearer secret-key-123"
+```
+
+Switch models by changing the `model` parameter in requests.
+
+## API Endpoints Reference
+
+### Available Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/models` | GET | List all available models |
+| `/v1/chat/completions` | POST | Create a chat completion |
+| `/v1/completions` | POST | Create a text completion |
+| `/v1/embeddings` | POST | Generate embeddings (if model supports) |
+
+### OpenAI Compatibility
+
+Jan's API implements these OpenAI endpoints:
+- ✅ Chat Completions
+- ✅ Completions  
+- ✅ Models List
+- ✅ Embeddings (for compatible models)
+- ✅ Streaming
+- ❌ Images (not yet supported)
+- ❌ Audio (not yet supported)
+- ❌ Fine-tuning (not applicable)
+
+## Best Practices
+
+<Steps>
+  <Step title="Use Strong API Keys">
+    Generate random, long keys. Don't use simple passwords like "password123".
+  </Step>
+  
+  <Step title="Keep Server Local When Possible">
+    Use `127.0.0.1` unless you specifically need network access.
+  </Step>
+  
+  <Step title="Monitor Server Logs">
+    Enable verbose logging during development to catch issues early.
+  </Step>
+  
+  <Step title="Test with curl First">
+    Before integrating into applications, verify the API works with simple curl commands.
+  </Step>
+  
+  <Step title="Handle Errors Gracefully">
+    Implement retry logic and error handling in your applications.
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Local Models" icon="laptop" href="/features/local-models">
+    Learn how to download and manage models to serve via API
+  </Card>
+  <Card title="Model Parameters" icon="sliders" href="/features/model-parameters">
+    Configure model behavior and performance
+  </Card>
+  <Card title="Server Examples" icon="books" href="/docs/desktop/server-examples/continue-dev">
+    See real-world integration examples
+  </Card>
+  <Card title="MCP Integration" icon="plug" href="/features/mcp-integration">
+    Extend model capabilities with external tools
+  </Card>
+</CardGroup>

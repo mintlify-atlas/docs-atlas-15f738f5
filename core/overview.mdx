@@ -1,0 +1,134 @@
+---
+title: Core Library Overview
+description: Introduction to @janhq/core - the foundation for building Jan extensions
+---
+
+# Core Library Overview
+
+The `@janhq/core` library is the foundation for building extensions in Jan. It provides type definitions, base classes, and an event system that enables seamless integration with the Jan platform.
+
+## What is @janhq/core?
+
+`@janhq/core` is a TypeScript library that exports:
+
+- **Type definitions** for models, messages, threads, and more
+- **Base extension classes** to build custom extensions
+- **Event system** for communication between components
+- **Interfaces** for implementing model management and inference capabilities
+
+## Installation
+
+```bash
+npm install @janhq/core
+```
+
+## Core Exports
+
+The library exports from several modules:
+
+```typescript
+export * from './types'
+export * from './browser'
+```
+
+### Available Type Modules
+
+<CardGroup cols={2}>
+  <Card title="Model Types" icon="cube" href="/core/types#model-types">
+    Types for model definitions, settings, and parameters
+  </Card>
+  <Card title="Message Types" icon="message" href="/core/types#message-types">
+    Types for messages, threads, and conversations
+  </Card>
+  <Card title="Assistant Types" icon="robot" href="/core/types#assistant-types">
+    Types for assistant configuration and tools
+  </Card>
+  <Card title="Inference Types" icon="brain" href="/core/types#inference-types">
+    Types for chat completion and inference requests
+  </Card>
+</CardGroup>
+
+## Key Concepts
+
+### Extensions
+
+Extensions are the building blocks of Jan. Each extension extends the `BaseExtension` class and implements specific functionality.
+
+```typescript
+import { BaseExtension, ExtensionTypeEnum } from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Model
+  }
+
+  onLoad(): void {
+    console.log('Extension loaded')
+  }
+
+  onUnload(): void {
+    console.log('Extension unloaded')
+  }
+}
+```
+
+### Event System
+
+The event system enables communication between extensions and the core application.
+
+```typescript
+import { events, MessageEvent } from '@janhq/core'
+
+// Listen for events
+events.on(MessageEvent.OnMessageSent, (data) => {
+  console.log('Message sent:', data)
+})
+
+// Emit events
+events.emit(MessageEvent.OnMessageResponse, messageData)
+```
+
+### Type Safety
+
+All types are fully typed with TypeScript, providing excellent IntelliSense support and compile-time safety.
+
+```typescript
+import { Model, Thread, ThreadMessage } from '@janhq/core'
+
+const model: Model = {
+  id: 'my-model',
+  name: 'My Model',
+  // ... TypeScript ensures all required fields are present
+}
+```
+
+## Global Core Object
+
+The library declares a global `core` object used internally:
+
+```typescript
+declare global {
+  var core: any | undefined
+}
+```
+
+<Warning>
+The global `core` object is for internal use. Extensions should use the exported APIs and events system.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Type Definitions" icon="code" href="/core/types">
+    Explore all available TypeScript types
+  </Card>
+  <Card title="Event System" icon="tower-broadcast" href="/core/events">
+    Learn about the event-driven architecture
+  </Card>
+  <Card title="Extension Base Classes" icon="puzzle-piece" href="/core/extensions">
+    Build your first extension
+  </Card>
+  <Card title="Model Interface" icon="cube" href="/core/types#modelinterface">
+    Implement model management
+  </Card>
+</CardGroup>

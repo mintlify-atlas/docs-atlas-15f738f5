@@ -1,0 +1,397 @@
+---
+title: Event System
+description: Event-driven communication in @janhq/core
+---
+
+# Event System
+
+The `@janhq/core` event system enables decoupled communication between extensions and the core application. Extensions can listen for events, emit events, and react to changes throughout the application.
+
+## Event API
+
+The event system is accessed through the `events` object exported from `@janhq/core`.
+
+### Importing Events
+
+```typescript
+import { events } from '@janhq/core'
+```
+
+## Core Functions
+
+### on()
+
+Adds an observer for an event.
+
+```typescript
+const on: (eventName: string, handler: Function) => void
+```
+
+**Parameters:**
+- `eventName` - The name of the event to observe
+- `handler` - The handler function to call when the event is observed
+
+**Example:**
+
+```typescript
+import { events, MessageEvent } from '@janhq/core'
+
+events.on(MessageEvent.OnMessageSent, (data) => {
+  console.log('Message sent:', data)
+})
+```
+
+### off()
+
+Removes an observer for an event.
+
+```typescript
+const off: (eventName: string, handler: Function) => void
+```
+
+**Parameters:**
+- `eventName` - The name of the event to stop observing
+- `handler` - The handler function to remove
+
+**Example:**
+
+```typescript
+const handler = (data) => {
+  console.log('Message received:', data)
+}
+
+// Add listener
+events.on(MessageEvent.OnMessageResponse, handler)
+
+// Remove listener
+events.off(MessageEvent.OnMessageResponse, handler)
+```
+
+### emit()
+
+Emits an event to all observers.
+
+```typescript
+const emit: (eventName: string, object: any) => void
+```
+
+**Parameters:**
+- `eventName` - The name of the event to emit
+- `object` - The object to pass to the event callback
+
+**Example:**
+
+```typescript
+import { events, ModelEvent } from '@janhq/core'
+
+events.emit(ModelEvent.OnModelReady, {
+  modelId: 'my-model',
+  timestamp: Date.now(),
+})
+```
+
+## Available Events
+
+The library provides several event enums for type-safe event handling.
+
+### ModelEvent
+
+Events related to model lifecycle.
+
+```typescript
+enum ModelEvent {
+  /** Emitted when a model initializes */
+  OnModelInit = 'OnModelInit',
+  
+  /** Emitted when a model is ready */
+  OnModelReady = 'OnModelReady',
+  
+  /** Emitted when a model fails loading */
+  OnModelFail = 'OnModelFail',
+  
+  /** Emitted when a model starts to stop */
+  OnModelStop = 'OnModelStop',
+  
+  /** Emitted when a model stopped successfully */
+  OnModelStopped = 'OnModelStopped',
+  
+  /** Emitted when the model list is updated */
+  OnModelsUpdate = 'OnModelsUpdate',
+}
+```
+
+**Usage:**
+
+```typescript
+import { events, ModelEvent } from '@janhq/core'
+
+// Listen for model ready
+events.on(ModelEvent.OnModelReady, (model) => {
+  console.log(`Model ${model.id} is ready`)
+})
+
+// Listen for model failures
+events.on(ModelEvent.OnModelFail, (error) => {
+  console.error('Model failed to load:', error)
+})
+
+// Emit model update
+events.emit(ModelEvent.OnModelsUpdate, updatedModels)
+```
+
+### MessageEvent
+
+Events related to messages in threads.
+
+```typescript
+enum MessageEvent {
+  /** Emitted when a message is sent */
+  OnMessageSent = 'OnMessageSent',
+  
+  /** Emitted when a message is received */
+  OnMessageResponse = 'OnMessageResponse',
+  
+  /** Emitted when a message is updated */
+  OnMessageUpdate = 'OnMessageUpdate',
+}
+```
+
+**Usage:**
+
+```typescript
+import { events, MessageEvent, ThreadMessage } from '@janhq/core'
+
+// Listen for sent messages
+events.on(MessageEvent.OnMessageSent, (message: ThreadMessage) => {
+  console.log('User sent:', message.content)
+})
+
+// Listen for responses
+events.on(MessageEvent.OnMessageResponse, (message: ThreadMessage) => {
+  console.log('Assistant replied:', message.content)
+})
+
+// Emit message update
+events.emit(MessageEvent.OnMessageUpdate, updatedMessage)
+```
+
+### InferenceEvent
+
+Events related to inference operations.
+
+```typescript
+enum InferenceEvent {
+  /** Emitted when inference is stopped */
+  OnInferenceStopped = 'OnInferenceStopped',
+}
+```
+
+**Usage:**
+
+```typescript
+import { events, InferenceEvent } from '@janhq/core'
+
+events.on(InferenceEvent.OnInferenceStopped, (data) => {
+  console.log('Inference stopped:', data)
+})
+```
+
+### AssistantEvent
+
+Events related to assistants.
+
+```typescript
+enum AssistantEvent {
+  /** Emitted when the assistant list is updated */
+  OnAssistantsUpdate = 'OnAssistantsUpdate',
+}
+```
+
+**Usage:**
+
+```typescript
+import { events, AssistantEvent } from '@janhq/core'
+
+events.on(AssistantEvent.OnAssistantsUpdate, (assistants) => {
+  console.log('Assistants updated:', assistants)
+})
+```
+
+### AppConfigurationEventName
+
+Events related to application configuration.
+
+```typescript
+enum AppConfigurationEventName {
+  /** Emitted when configuration is updated */
+  OnConfigurationUpdate = 'OnConfigurationUpdate',
+}
+```
+
+**Usage:**
+
+```typescript
+import { events, AppConfigurationEventName } from '@janhq/core'
+
+events.on(AppConfigurationEventName.OnConfigurationUpdate, (config) => {
+  console.log('Configuration updated:', config)
+})
+```
+
+## Extension Event Patterns
+
+### Basic Event Listener
+
+```typescript
+import { BaseExtension, events, ModelEvent } from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  onLoad(): void {
+    // Register event listeners
+    events.on(ModelEvent.OnModelReady, this.handleModelReady)
+  }
+
+  onUnload(): void {
+    // Clean up event listeners
+    events.off(ModelEvent.OnModelReady, this.handleModelReady)
+  }
+
+  handleModelReady = (model: any) => {
+    console.log('Model ready:', model)
+  }
+}
+```
+
+### Emitting Custom Events
+
+```typescript
+import { BaseExtension, events } from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  async processData(data: any) {
+    // Do work
+    const result = await this.process(data)
+    
+    // Emit custom event
+    events.emit('MyExtension.ProcessComplete', {
+      success: true,
+      result,
+      timestamp: Date.now(),
+    })
+  }
+}
+```
+
+### Event Chain Pattern
+
+```typescript
+import { BaseExtension, events, MessageEvent, ModelEvent } from '@janhq/core'
+
+export default class ChainExtension extends BaseExtension {
+  onLoad(): void {
+    // Chain multiple events
+    events.on(MessageEvent.OnMessageSent, this.handleMessage)
+  }
+
+  handleMessage = async (message: any) => {
+    // Process message
+    const response = await this.generateResponse(message)
+    
+    // Emit response event
+    events.emit(MessageEvent.OnMessageResponse, response)
+  }
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Type-Safe Events" icon="shield-check">
+    Always use the provided event enums instead of string literals for type safety.
+  </Card>
+  <Card title="Clean Up Listeners" icon="broom">
+    Remove event listeners in `onUnload()` to prevent memory leaks.
+  </Card>
+  <Card title="Avoid Blocking" icon="bolt">
+    Keep event handlers fast. Use async operations for heavy work.
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Wrap event handlers in try-catch blocks to prevent crashes.
+  </Card>
+</CardGroup>
+
+### Clean Up Pattern
+
+```typescript
+export default class MyExtension extends BaseExtension {
+  private handlers: Map<string, Function> = new Map()
+
+  onLoad(): void {
+    const messageHandler = (data: any) => console.log(data)
+    const modelHandler = (data: any) => console.log(data)
+
+    // Store handlers for cleanup
+    this.handlers.set('message', messageHandler)
+    this.handlers.set('model', modelHandler)
+
+    events.on(MessageEvent.OnMessageSent, messageHandler)
+    events.on(ModelEvent.OnModelReady, modelHandler)
+  }
+
+  onUnload(): void {
+    // Clean up all handlers
+    events.off(MessageEvent.OnMessageSent, this.handlers.get('message')!)
+    events.off(ModelEvent.OnModelReady, this.handlers.get('model')!)
+    this.handlers.clear()
+  }
+}
+```
+
+### Error Handling
+
+```typescript
+events.on(ModelEvent.OnModelInit, (model) => {
+  try {
+    // Process model
+    this.processModel(model)
+  } catch (error) {
+    console.error('Error processing model:', error)
+    events.emit(ModelEvent.OnModelFail, { model, error })
+  }
+})
+```
+
+## Implementation Details
+
+The event system is implemented in `~/workspace/source/core/src/browser/events.ts`:
+
+```typescript
+const on: (eventName: string, handler: Function) => void = (eventName, handler) => {
+  globalThis.core?.events?.on(eventName, handler)
+}
+
+const off: (eventName: string, handler: Function) => void = (eventName, handler) => {
+  globalThis.core?.events?.off(eventName, handler)
+}
+
+const emit: (eventName: string, object: any) => void = (eventName, object) => {
+  globalThis.core?.events?.emit(eventName, object)
+}
+
+export const events = { on, off, emit }
+```
+
+<Info>
+The event system uses the global `core` object internally. Extensions should always use the exported `events` API.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Extension Base Classes" icon="puzzle-piece" href="/core/extensions">
+    Learn how to use events in extensions
+  </Card>
+  <Card title="Type Definitions" icon="code" href="/core/types">
+    Explore event payload types
+  </Card>
+</CardGroup>

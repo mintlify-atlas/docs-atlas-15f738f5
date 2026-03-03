@@ -1,0 +1,445 @@
+---
+title: Chat Completions
+description: Generate chat completions using Jan's local API server.
+---
+
+## Create Chat Completion
+
+Creates a model response for the given chat conversation.
+
+<CodeGroup>
+```bash cURL
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "llama3-8b-instruct",
+    "messages": [
+      {"role": "system", "content": "You are a helpful assistant."},
+      {"role": "user", "content": "Tell me a joke."}
+    ],
+    "temperature": 0.7,
+    "max_tokens": 150
+  }'
+```
+
+```python Python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://127.0.0.1:1337/v1",
+    api_key="secret-key-123"
+)
+
+response = client.chat.completions.create(
+    model="llama3-8b-instruct",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Tell me a joke."}
+    ],
+    temperature=0.7,
+    max_tokens=150
+)
+
+print(response.choices[0].message.content)
+```
+
+```javascript JavaScript
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  baseURL: 'http://127.0.0.1:1337/v1',
+  apiKey: 'secret-key-123'
+});
+
+const response = await client.chat.completions.create({
+  model: 'llama3-8b-instruct',
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'Tell me a joke.' }
+  ],
+  temperature: 0.7,
+  max_tokens: 150
+});
+
+console.log(response.choices[0].message.content);
+```
+</CodeGroup>
+
+### Request Body
+
+<ParamField body="model" type="string" required>
+  The ID of the model to use. Must match a model available in Jan.
+  
+  Example: `llama3-8b-instruct`, `qwen2.5-7b-instruct`
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  A list of messages comprising the conversation so far.
+  
+  Each message has:
+  - `role` (string, required): One of `system`, `user`, `assistant`, or `tool`
+  - `content` (string or array): The message content. Can be a string or an array of content parts (for multimodal messages)
+  - `name` (string, optional): The name of the message author
+  - `tool_calls` (array, optional): Tool calls made by the assistant
+  - `tool_call_id` (string, optional): The ID of the tool call this message is responding to
+</ParamField>
+
+<ParamField body="temperature" type="number" default="0.7">
+  Sampling temperature between 0 and 2. Higher values make output more random, lower values more deterministic.
+</ParamField>
+
+<ParamField body="max_tokens" type="number">
+  The maximum number of tokens to generate. Set to `null` or omit for unlimited generation (up to context limit).
+</ParamField>
+
+<ParamField body="top_p" type="number" default="0.95">
+  Nucleus sampling: only tokens with cumulative probability up to `top_p` are considered.
+</ParamField>
+
+<ParamField body="top_k" type="number" default="40">
+  Only the top K most likely tokens are considered for generation.
+</ParamField>
+
+<ParamField body="min_p" type="number">
+  Minimum probability threshold for token selection.
+</ParamField>
+
+<ParamField body="stream" type="boolean" default={false}>
+  If `true`, returns a stream of Server-Sent Events (SSE) as the model generates tokens.
+</ParamField>
+
+<ParamField body="stop" type="string | array">
+  Up to 4 sequences where the API will stop generating further tokens.
+</ParamField>
+
+<ParamField body="presence_penalty" type="number" default="0">
+  Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number" default="0">
+  Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text.
+</ParamField>
+
+<ParamField body="repeat_penalty" type="number" default="1.1">
+  Penalty for repeating tokens. Values > 1 discourage repetition.
+</ParamField>
+
+<ParamField body="repeat_last_n" type="number" default="64">
+  Number of previous tokens to consider for repeat penalty.
+</ParamField>
+
+<ParamField body="seed" type="number">
+  Random seed for reproducible generation.
+</ParamField>
+
+<ParamField body="tools" type="array">
+  A list of tools the model may call. Each tool has:
+  - `type` (string): Currently only `"function"` is supported
+  - `function` (object): Function definition with `name`, `description`, and `parameters`
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  Controls which (if any) function is called by the model.
+  - `"none"`: Model will not call any function
+  - `"auto"`: Model can pick between generating a message or calling a function
+  - `"required"`: Model must call one or more functions
+  - `{"type": "function", "function": {"name": "my_function"}}`: Forces a specific function call
+</ParamField>
+
+### Advanced Parameters
+
+<ParamField body="dynatemp_range" type="number">
+  Dynamic temperature range for sampling.
+</ParamField>
+
+<ParamField body="dynatemp_exponent" type="number">
+  Dynamic temperature exponent.
+</ParamField>
+
+<ParamField body="typical_p" type="number">
+  Typical probability mass for sampling.
+</ParamField>
+
+<ParamField body="mirostat" type="number">
+  Enable Mirostat sampling. `0` = disabled, `1` = Mirostat, `2` = Mirostat 2.0.
+</ParamField>
+
+<ParamField body="mirostat_tau" type="number">
+  Mirostat target entropy.
+</ParamField>
+
+<ParamField body="mirostat_eta" type="number">
+  Mirostat learning rate.
+</ParamField>
+
+<ParamField body="logit_bias" type="object">
+  Modify the likelihood of specified tokens appearing. Maps token IDs to bias values (-100 to 100).
+</ParamField>
+
+<ParamField body="cache_prompt" type="boolean">
+  Enable KV cache for the prompt.
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  A unique identifier for the chat completion.
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  The object type, always `chat.completion`.
+</ResponseField>
+
+<ResponseField name="created" type="number">
+  Unix timestamp (in seconds) of when the completion was created.
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  The model used for the completion.
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  A list of chat completion choices. Can be more than one if `n` is greater than 1.
+  
+  Each choice contains:
+  - `index` (number): The index of this choice
+  - `message` (object): The generated message
+    - `role` (string): Always `assistant`
+    - `content` (string): The content of the message
+    - `tool_calls` (array, optional): Tool calls made by the model
+  - `finish_reason` (string): Why generation stopped (`stop`, `length`, `tool_calls`, `content_filter`)
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token usage information.
+  - `prompt_tokens` (number): Number of tokens in the prompt
+  - `completion_tokens` (number): Number of tokens in the completion
+  - `total_tokens` (number): Total tokens used
+</ResponseField>
+
+<ResponseField name="system_fingerprint" type="string">
+  System fingerprint for the backend.
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1699896916,
+  "model": "llama3-8b-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Why did the scarecrow win an award? Because he was outstanding in his field!"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 18,
+    "total_tokens": 38
+  },
+  "system_fingerprint": "llamacpp-b1-e4912fc"
+}
+```
+
+## Streaming
+
+When `stream` is set to `true`, the API returns Server-Sent Events (SSE) as the model generates tokens.
+
+### Streaming Request
+
+```bash cURL
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "llama3-8b-instruct",
+    "messages": [{"role": "user", "content": "Count to 5"}],
+    "stream": true
+  }'
+```
+
+### Streaming Response
+
+Each chunk is a JSON object prefixed with `data: `:
+
+```
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1699896916,"model":"llama3-8b-instruct","choices":[{"index":0,"delta":{"role":"assistant","content":"1"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1699896916,"model":"llama3-8b-instruct","choices":[{"index":0,"delta":{"content":", 2"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc123","object":"chat.completion.chunk","created":1699896916,"model":"llama3-8b-instruct","choices":[{"index":0,"delta":{"content":", 3, 4, 5"},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+### Streaming Response Fields
+
+<ResponseField name="id" type="string">
+  Unique identifier for the chat completion (consistent across all chunks).
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  Always `chat.completion.chunk`.
+</ResponseField>
+
+<ResponseField name="created" type="number">
+  Unix timestamp.
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  The model used.
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  Array of choices.
+  - `index` (number): Choice index
+  - `delta` (object): Content delta
+    - `role` (string, optional): Set in first chunk
+    - `content` (string, optional): Incremental content
+  - `finish_reason` (string | null): Reason for stopping (only in final chunk)
+</ResponseField>
+
+<ResponseField name="prompt_progress" type="object">
+  Jan-specific field showing prompt processing progress.
+  - `cache` (number): Tokens already in KV cache
+  - `processed` (number): Tokens processed so far
+  - `total` (number): Total prompt tokens
+  - `time_ms` (number): Time spent processing
+</ResponseField>
+
+## Multimodal Messages
+
+Jan supports vision models that can process images alongside text.
+
+### Image Input
+
+```bash cURL
+curl http://127.0.0.1:1337/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer secret-key-123" \
+  -d '{
+    "model": "llava-v1.6-7b",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {"type": "text", "text": "What is in this image?"},
+          {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,..."}}
+        ]
+      }
+    ]
+  }'
+```
+
+### Content Array Format
+
+When using multimodal messages, the `content` field is an array of objects:
+
+<ParamField body="content[].type" type="string" required>
+  The type of content: `text`, `image_url`, or `input_audio`.
+</ParamField>
+
+<ParamField body="content[].text" type="string">
+  Text content (when type is `text`).
+</ParamField>
+
+<ParamField body="content[].image_url" type="object">
+  Image content (when type is `image_url`).
+  - `url` (string): URL or base64-encoded data URI
+</ParamField>
+
+## Function Calling
+
+Jan supports function calling for compatible models.
+
+### Request with Tools
+
+```json
+{
+  "model": "llama3-8b-instruct",
+  "messages": [
+    {"role": "user", "content": "What's the weather in San Francisco?"}
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get the current weather in a location",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "The city and state, e.g. San Francisco, CA"
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["celsius", "fahrenheit"]
+            }
+          },
+          "required": ["location"]
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto"
+}
+```
+
+### Response with Tool Call
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1699896916,
+  "model": "llama3-8b-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_abc123",
+            "type": "function",
+            "function": {
+              "name": "get_weather",
+              "arguments": "{\"location\": \"San Francisco, CA\", \"unit\": \"fahrenheit\"}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 82,
+    "completion_tokens": 18,
+    "total_tokens": 100
+  }
+}
+```
+
+## Error Handling
+
+### Finish Reasons
+
+- `stop`: Natural stop point or stop sequence reached
+- `length`: Maximum token limit reached (context overflow)
+- `tool_calls`: Model called a function
+- `content_filter`: Content was filtered
+
+### Context Overflow
+
+When the conversation exceeds the model's context window, the API returns `finish_reason: "length"`. You'll need to truncate the conversation history or use a model with a larger context window.

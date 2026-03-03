@@ -1,0 +1,316 @@
+---
+title: Commands Reference
+description: Complete reference for all Jan CLI commands and subcommands
+---
+
+## Top-Level Commands
+
+### serve
+
+Load a local model and expose it at localhost:6767/v1. Auto-detects LlamaCPP or MLX.
+
+```bash
+jan serve [MODEL_ID] [OPTIONS]
+```
+
+See the [serve command documentation](/cli/serve) for detailed usage.
+
+---
+
+### launch
+
+Start a local model, then launch an AI agent with it pre-wired (environment variables set automatically).
+
+```bash
+jan launch [PROGRAM] [OPTIONS] [-- PROGRAM_ARGS...]
+```
+
+See the [launch command documentation](/cli/launch) for detailed usage.
+
+---
+
+### threads
+
+List and inspect conversation threads saved by the Jan app.
+
+```bash
+jan threads <SUBCOMMAND>
+```
+
+#### Subcommands
+
+<AccordionGroup>
+  <Accordion title="threads list">
+    Print all threads as JSON.
+
+    ```bash
+    jan threads list
+    ```
+
+    **Output**: JSON array of thread objects with metadata.
+  </Accordion>
+
+  <Accordion title="threads get <ID>">
+    Print a single thread's metadata as JSON.
+
+    ```bash
+    jan threads get <THREAD_ID>
+    ```
+
+    <ParamField path="id" type="string" required>
+      Thread ID to retrieve
+    </ParamField>
+
+    **Output**: JSON object with thread metadata.
+  </Accordion>
+
+  <Accordion title="threads delete <ID>">
+    Permanently delete a thread and all its messages.
+
+    ```bash
+    jan threads delete <THREAD_ID>
+    ```
+
+    <ParamField path="id" type="string" required>
+      Thread ID to delete
+    </ParamField>
+
+    **Output**: Confirmation JSON with deleted thread ID.
+  </Accordion>
+
+  <Accordion title="threads messages <ID>">
+    Print all messages in a thread as JSON.
+
+    ```bash
+    jan threads messages <THREAD_ID>
+    ```
+
+    <ParamField path="thread_id" type="string" required>
+      Thread ID to get messages from
+    </ParamField>
+
+    **Output**: JSON array of message objects.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### models
+
+List and load models installed in the Jan data folder.
+
+```bash
+jan models <SUBCOMMAND>
+```
+
+#### Subcommands
+
+<AccordionGroup>
+  <Accordion title="models list">
+    Print all installed models as JSON (from the Jan data folder).
+
+    ```bash
+    jan models list [--engine <ENGINE>]
+    ```
+
+    <ParamField query="engine" type="string" default="all">
+      Filter by engine: `llamacpp`, `mlx`, or `all`
+    </ParamField>
+
+    **Example Output**:
+    ```json
+    [
+      {
+        "id": "qwen3.5-35b-a3b",
+        "engine": "llamacpp",
+        "name": "Qwen 3.5 35B",
+        "model_path": "/Users/you/Library/Application Support/Jan/models/qwen3.5-35b-a3b/model.gguf",
+        "size_bytes": 21474836480,
+        "embedding": false,
+        "capabilities": ["text"],
+        "mmproj_path": null
+      }
+    ]
+    ```
+  </Accordion>
+
+  <Accordion title="models load">
+    Load a model and serve it — alias for the top-level `serve` command.
+
+    ```bash
+    jan models load [MODEL_ID] [OPTIONS]
+    ```
+
+    Accepts the same options as `jan serve`. See [serve documentation](/cli/serve).
+  </Accordion>
+
+  <Accordion title="models load-mlx">
+    Load an MLX model directly (macOS / Apple Silicon only).
+
+    ```bash
+    jan models load-mlx --model-id <MODEL_ID> [OPTIONS]
+    ```
+
+    <ParamField query="model-id" type="string" required>
+      Model ID as shown by `jan models list --engine mlx`
+    </ParamField>
+
+    <ParamField query="model-path" type="string">
+      Path to the MLX model directory (auto-resolved from model.yml when omitted)
+    </ParamField>
+
+    <ParamField query="bin" type="string">
+      Path to the mlx-server binary (auto-discovered from Jan.app when omitted)
+    </ParamField>
+
+    <ParamField query="port" type="number" default="6767">
+      Port the model server listens on (0 = pick a random free port)
+    </ParamField>
+
+    <ParamField query="ctx-size" type="number" default="0">
+      Context window size in tokens (0 = model default)
+    </ParamField>
+
+    <ParamField query="embedding" type="boolean" default="false">
+      Treat the model as an embedding model
+    </ParamField>
+
+    <ParamField query="timeout" type="number" default="120">
+      Seconds to wait for the model server to become ready
+    </ParamField>
+
+    <ParamField query="api-key" type="string" default="">
+      API key required by clients (sets MLX_API_KEY on the server)
+    </ParamField>
+  </Accordion>
+</AccordionGroup>
+
+---
+
+### app
+
+Show app configuration and data folder location.
+
+```bash
+jan app <SUBCOMMAND>
+```
+
+#### Subcommands
+
+<AccordionGroup>
+  <Accordion title="app data-folder">
+    Print the Jan data folder path (where models, threads, and config are stored).
+
+    ```bash
+    jan app data-folder
+    ```
+
+    **Example Output**:
+    ```json
+    {
+      "data_folder": "/Users/you/Library/Application Support/Jan"
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="app config">
+    Print the Jan configuration as JSON.
+
+    ```bash
+    jan app config
+    ```
+
+    **Output**: JSON object with Jan configuration settings.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Global Options
+
+<ParamField query="--help" type="flag">
+  Display help information for any command
+
+  ```bash
+  jan --help
+  jan serve --help
+  jan launch --help
+  ```
+</ParamField>
+
+<ParamField query="--version" type="flag">
+  Display the Jan CLI version
+
+  ```bash
+  jan --version
+  ```
+</ParamField>
+
+<ParamField query="-v, --verbose" type="flag">
+  Print full server logs (llama.cpp / mlx output) instead of the loading spinner
+
+  Available on: `serve`, `launch`
+
+  ```bash
+  jan serve qwen3.5-35b --verbose
+  jan launch claude --model qwen3.5-35b -v
+  ```
+</ParamField>
+
+---
+
+## Examples
+
+<CodeGroup>
+```bash Serve a model
+jan serve qwen3.5-35b-a3b
+```
+
+```bash Launch Claude Code
+jan launch claude --model qwen3.5-35b-a3b
+```
+
+```bash Auto-fit context to VRAM
+jan serve qwen3.5-35b-a3b --fit
+```
+
+```bash Run in background
+jan serve qwen3.5-35b-a3b --detach
+```
+
+```bash List all models
+jan models list
+```
+
+```bash List LlamaCPP models only
+jan models list --engine llamacpp
+```
+
+```bash Get thread details
+jan threads get abc123
+```
+
+```bash View data folder
+jan app data-folder
+```
+</CodeGroup>
+
+---
+
+## Exit Codes
+
+- `0`: Success
+- `1`: Error (with error message printed to stderr)
+
+---
+
+## See Also
+
+<CardGroup cols={2}>
+  <Card title="Serve Command" icon="server" href="/cli/serve">
+    Detailed guide for serving models
+  </Card>
+  <Card title="Launch Command" icon="rocket" href="/cli/launch">
+    Wire AI agents to local models
+  </Card>
+</CardGroup>

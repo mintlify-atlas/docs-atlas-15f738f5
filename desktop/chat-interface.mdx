@@ -1,0 +1,167 @@
+---
+title: "Chat Interface"
+description: "Learn how to interact with AI models, send messages, and use advanced chat features"
+---
+
+## Starting a Conversation
+
+To start a new chat:
+
+1. Click **New Chat** in the sidebar or press **Cmd/Ctrl + N**
+2. Select a model from the model dropdown
+3. (Optional) Choose an assistant with pre-configured instructions
+4. Type your message in the input box
+
+## Sending Messages
+
+### Text Messages
+
+Type your message in the chat input at the bottom of the screen:
+
+- Press **Enter** to send your message
+- Press **Shift + Enter** to add a new line without sending
+
+### Attaching Images
+
+For models with vision capabilities:
+
+1. Click the **+** button in the chat input
+2. Select **Add Images**
+3. Choose one or more images (JPEG, JPG, PNG)
+4. Type your message and send
+
+You can also:
+- **Drag and drop** images directly into the chat area
+- **Paste** images from your clipboard (Cmd/Ctrl + V)
+
+<Note>
+Vision features require models with vision capabilities. Jan will prompt you to download a vision model if needed.
+</Note>
+
+### Attaching Documents
+
+For models with tool/RAG capabilities:
+
+1. Click the **+** button in the chat input
+2. Select **Add Documents**
+3. Choose documents (PDF, DOCX, TXT, MD, CSV, XLSX, PPTX, HTML)
+4. Select ingestion mode:
+   - **Inline** - Insert document content directly into the prompt
+   - **Embeddings** - Create a vector database for semantic search
+
+Documents are processed and indexed to provide context-aware responses.
+
+<Warning>
+Document processing requires the RAG (Retrieval Augmented Generation) feature to be enabled in Settings.
+</Warning>
+
+## Message Actions
+
+### User Messages
+
+For messages you send, you can:
+
+- **Copy** - Copy the message text to clipboard
+- **Edit** - Modify your message and regenerate the response
+- **Delete** - Remove the message from the thread
+
+### Assistant Messages
+
+For AI responses, you can:
+
+- **Copy** - Copy the response to clipboard
+- **Regenerate** - Generate a new response to the same prompt
+- **Edit** - Modify the assistant's message
+- **Delete** - Remove the message from the thread
+
+## Advanced Features
+
+### Tool Calling
+
+When a model supports tools, it can:
+
+- **Search documents** - Query embedded documents in the thread
+- **Execute MCP tools** - Use Model Context Protocol servers
+- **Browser extension** - Screenshot and analyze web pages
+
+Tool executions are shown in the conversation with:
+- Tool name and input parameters
+- Execution status (running, success, error)
+- Tool output or error message
+
+<Tip>
+You can enable/disable specific tools per thread from the tools dropdown in the chat input area.
+</Tip>
+
+### Token Counter
+
+Jan displays token usage and generation speed for each message:
+
+- **Token count** - Number of tokens in the current context
+- **Generation speed** - Tokens per second during streaming
+- **Model capacity** - Visual indicator of context usage
+
+Switch between compact and detailed views in Settings.
+
+### Reasoning Display
+
+For models with reasoning capabilities (like DeepSeek R1), Jan shows the model's thinking process:
+
+- Reasoning sections are collapsible
+- Auto-expand during streaming
+- Can be hidden for cleaner conversation view
+
+## Thread Management
+
+### Organizing Conversations
+
+- **Rename** - Click the thread title to rename
+- **Delete** - Remove individual threads or all threads
+- **Search** - Press **Cmd/Ctrl + K** to search across threads
+
+### Projects
+
+Organize threads into projects:
+
+1. Create a new project from the sidebar
+2. Assign an assistant to the project
+3. Add project-specific documents
+4. All threads in the project share the same knowledge base
+
+<Info>
+Project documents are accessible to all threads within that project using RAG tools.
+</Info>
+
+## Keyboard Shortcuts
+
+| Action | Shortcut |
+|--------|----------|
+| New chat | **Cmd/Ctrl + N** |
+| New project | **Cmd/Ctrl + Shift + N** |
+| Toggle sidebar | **Cmd/Ctrl + B** |
+| Search | **Cmd/Ctrl + K** |
+| Send message | **Enter** |
+| New line | **Shift + Enter** |
+
+View all shortcuts in **Settings > Shortcuts**.
+
+## Stopping Generation
+
+To stop an AI response while it's generating:
+
+- Click the **Stop** button in the chat input area
+- The partial response will be saved
+- You can regenerate or continue the conversation
+
+## Context Management
+
+If you receive a context length error:
+
+1. Jan will display an **Increase Context Size** button
+2. Click it to automatically increase the model's context window by 50%
+3. The model will restart with the new settings
+4. Your conversation will continue from where it stopped
+
+<Warning>
+Increasing context size requires more RAM. Monitor system resources to avoid performance issues.
+</Warning>

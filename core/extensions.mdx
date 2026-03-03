@@ -1,0 +1,573 @@
+---
+title: Extension Base Classes
+description: Build extensions with BaseExtension and ExtensionType interfaces
+---
+
+# Extension Base Classes
+
+Extensions are the building blocks of Jan. The `BaseExtension` class provides the foundation for creating custom extensions that integrate with the Jan platform.
+
+## BaseExtension Class
+
+The `BaseExtension` is an abstract class that all extensions must extend. It provides core functionality for lifecycle management, settings, and model registration.
+
+### Importing
+
+```typescript
+import { BaseExtension, ExtensionTypeEnum } from '@janhq/core'
+```
+
+### Basic Structure
+
+```typescript
+export abstract class BaseExtension implements ExtensionType {
+  name: string
+  productName?: string
+  url: string
+  active: boolean
+  description: string
+  version: string
+
+  abstract onLoad(): void
+  abstract onUnload(): void
+  
+  type(): ExtensionTypeEnum | undefined
+  compatibility(): Compatibility | undefined
+}
+```
+
+## Extension Types
+
+Extensions can specify their type using `ExtensionTypeEnum`.
+
+```typescript
+enum ExtensionTypeEnum {
+  Assistant = 'assistant',
+  Conversational = 'conversational',
+  Inference = 'inference',
+  Model = 'model',
+  SystemMonitoring = 'systemMonitoring',
+  MCP = 'mcp',
+  HuggingFace = 'huggingFace',
+  Engine = 'engine',
+  Hardware = 'hardware',
+  RAG = 'rag',
+  VectorDB = 'vectorDB',
+}
+```
+
+### ExtensionType Interface
+
+```typescript
+interface ExtensionType {
+  type(): ExtensionTypeEnum | undefined
+}
+```
+
+### Compatibility Interface
+
+```typescript
+interface Compatibility {
+  platform: string[]
+  version: string
+}
+```
+
+## Creating an Extension
+
+### Basic Extension
+
+```typescript
+import { BaseExtension, ExtensionTypeEnum } from '@janhq/core'
+
+export default class MyExtension extends BaseExtension {
+  constructor() {
+    super(
+      'https://example.com/extension.js',  // url
+      'my-extension',                       // name
+      'My Extension',                       // productName
+      true,                                 // active
+      'A custom extension',                 // description
+      '1.0.0'                               // version
+    )
+  }
+
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Model
+  }
+
+  onLoad(): void {
+    console.log('Extension loaded')
+  }
+
+  onUnload(): void {
+    console.log('Extension unloaded')
+  }
+}
+```
+
+### Extension with Compatibility
+
+```typescript
+import { BaseExtension, ExtensionTypeEnum, Compatibility } from '@janhq/core'
+
+export default class PlatformExtension extends BaseExtension {
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Engine
+  }
+
+  compatibility(): Compatibility {
+    return {
+      platform: ['darwin', 'linux', 'win32'],
+      version: '>=0.5.0',
+    }
+  }
+
+  onLoad(): void {
+    console.log('Platform extension loaded')
+  }
+
+  onUnload(): void {
+    console.log('Platform extension unloaded')
+  }
+}
+```
+
+## Lifecycle Methods
+
+### onLoad()
+
+Called when the extension is loaded. Use this for initialization logic.
+
+```typescript
+onLoad(): void {
+  // Initialize resources
+  this.initializeDatabase()
+  
+  // Register event listeners
+  events.on(ModelEvent.OnModelReady, this.handleModelReady)
+  
+  // Register models
+  this.registerModels([
+    /* model definitions */
+  ])
+}
+```
+
+### onUnload()
+
+Called when the extension is unloaded. Use this for cleanup logic.
+
+```typescript
+onUnload(): void {
+  // Remove event listeners
+  events.off(ModelEvent.OnModelReady, this.handleModelReady)
+  
+  // Clean up resources
+  this.cleanup()
+}
+```
+
+### install()
+
+Optional method to install prerequisites for the extension.
+
+```typescript
+async install(): Promise<void> {
+  // Download required files
+  await this.downloadDependencies()
+  
+  // Set up configuration
+  await this.setupConfig()
+}
+```
+
+## Model Registration
+
+### registerModels()
+
+Register models with the ModelManager.
+
+```typescript
+import { BaseExtension, Model } from '@janhq/core'
+
+export default class ModelExtension extends BaseExtension {
+  async onLoad(): Promise<void> {
+    const models: Model[] = [
+      {
+        object: 'model',
+        version: '1.0',
+        format: 'gguf',
+        sources: [{
+          filename: 'model.gguf',
+          url: 'https://example.com/model.gguf',
+        }],
+        id: 'my-model',
+        name: 'My Model',
+        created: Date.now(),
+        description: 'A custom model',
+        settings: { ctx_len: 2048 },
+        parameters: { temperature: 0.7 },
+        metadata: {
+          author: 'Me',
+          tags: ['custom'],
+          size: 4096000000,
+        },
+        engine: 'nitro',
+      },
+    ]
+
+    await this.registerModels(models)
+  }
+}
+```
+
+## Settings Management
+
+Extensions can register and manage settings using localStorage.
+
+### registerSettings()
+
+Register settings for the extension.
+
+```typescript
+import { BaseExtension, SettingComponentProps } from '@janhq/core'
+
+export default class ConfigurableExtension extends BaseExtension {
+  async onLoad(): Promise<void> {
+    const settings: SettingComponentProps[] = [
+      {
+        key: 'api_key',
+        title: 'API Key',
+        description: 'Your API key',
+        controllerType: 'input',
+        controllerProps: {
+          placeholder: 'Enter API key',
+          value: '',
+          type: 'password',
+        },
+      },
+      {
+        key: 'temperature',
+        title: 'Temperature',
+        description: 'Model temperature',
+        controllerType: 'slider',
+        controllerProps: {
+          min: 0,
+          max: 2,
+          step: 0.1,
+          value: 0.7,
+        },
+      },
+      {
+        key: 'streaming',
+        title: 'Enable Streaming',
+        description: 'Stream responses',
+        controllerType: 'checkbox',
+        controllerProps: {
+          value: true,
+        },
+      },
+    ]
+
+    await this.registerSettings(settings)
+  }
+}
+```
+
+### getSetting()
+
+Get a specific setting value.
+
+```typescript
+async myMethod() {
+  const apiKey = await this.getSetting<string>('api_key', '')
+  const temperature = await this.getSetting<number>('temperature', 0.7)
+  
+  console.log('API Key:', apiKey)
+  console.log('Temperature:', temperature)
+}
+```
+
+### getSettings()
+
+Get all settings for the extension.
+
+```typescript
+async myMethod() {
+  const settings = await this.getSettings()
+  console.log('All settings:', settings)
+}
+```
+
+### updateSettings()
+
+Update extension settings.
+
+```typescript
+async myMethod() {
+  await this.updateSettings([
+    {
+      key: 'api_key',
+      controllerProps: {
+        value: 'new-api-key',
+      },
+    },
+    {
+      key: 'temperature',
+      controllerProps: {
+        value: 0.9,
+      },
+    },
+  ])
+}
+```
+
+### onSettingUpdate()
+
+Called when a setting is updated.
+
+```typescript
+onSettingUpdate<T>(key: string, value: T) {
+  console.log(`Setting ${key} updated to:`, value)
+  
+  if (key === 'api_key') {
+    this.reconnectWithNewKey(value as string)
+  }
+}
+```
+
+## Complete Extension Example
+
+Here's a complete example of a model extension with settings and event handling:
+
+```typescript
+import {
+  BaseExtension,
+  ExtensionTypeEnum,
+  Model,
+  ModelInterface,
+  SettingComponentProps,
+  events,
+  ModelEvent,
+} from '@janhq/core'
+
+export default class CustomModelExtension
+  extends BaseExtension
+  implements ModelInterface
+{
+  private apiKey: string = ''
+
+  constructor() {
+    super(
+      'https://example.com/extension.js',
+      'custom-model-extension',
+      'Custom Model Extension',
+      true,
+      'Provides custom model functionality',
+      '1.0.0'
+    )
+  }
+
+  type(): ExtensionTypeEnum {
+    return ExtensionTypeEnum.Model
+  }
+
+  compatibility() {
+    return {
+      platform: ['darwin', 'linux', 'win32'],
+      version: '>=0.5.0',
+    }
+  }
+
+  async onLoad(): Promise<void> {
+    // Register settings
+    await this.registerSettings([
+      {
+        key: 'api_key',
+        title: 'API Key',
+        description: 'Your API key',
+        controllerType: 'input',
+        controllerProps: {
+          placeholder: 'Enter API key',
+          value: '',
+          type: 'password',
+        },
+      },
+    ])
+
+    // Load settings
+    this.apiKey = await this.getSetting<string>('api_key', '')
+
+    // Register event listeners
+    events.on(ModelEvent.OnModelInit, this.handleModelInit)
+
+    // Register models
+    await this.registerModels(await this.fetchAvailableModels())
+
+    console.log('Custom Model Extension loaded')
+  }
+
+  async onUnload(): Promise<void> {
+    // Clean up event listeners
+    events.off(ModelEvent.OnModelInit, this.handleModelInit)
+    console.log('Custom Model Extension unloaded')
+  }
+
+  onSettingUpdate<T>(key: string, value: T): void {
+    if (key === 'api_key') {
+      this.apiKey = value as string
+      console.log('API key updated')
+    }
+  }
+
+  async install(): Promise<void> {
+    console.log('Installing prerequisites...')
+    // Download required files, setup configuration, etc.
+  }
+
+  // ModelInterface implementation
+  async pullModel(model: string, id?: string, name?: string): Promise<void> {
+    console.log(`Pulling model: ${model}`)
+    // Implementation
+  }
+
+  async cancelModelPull(model: string): Promise<void> {
+    console.log(`Cancelling pull for: ${model}`)
+    // Implementation
+  }
+
+  async deleteModel(model: string): Promise<void> {
+    console.log(`Deleting model: ${model}`)
+    // Implementation
+  }
+
+  async getModels(): Promise<Model[]> {
+    return await this.fetchAvailableModels()
+  }
+
+  async updateModel(model: Partial<Model>): Promise<Model> {
+    console.log(`Updating model: ${model.id}`)
+    // Implementation
+    return model as Model
+  }
+
+  async importModel(
+    model: string,
+    modePath: string,
+    name?: string
+  ): Promise<void> {
+    console.log(`Importing model from: ${modePath}`)
+    // Implementation
+  }
+
+  async getSources(): Promise<any[]> {
+    return []
+  }
+
+  async addSource(source: string): Promise<void> {
+    console.log(`Adding source: ${source}`)
+  }
+
+  async deleteSource(source: string): Promise<void> {
+    console.log(`Deleting source: ${source}`)
+  }
+
+  // Private methods
+  private handleModelInit = (model: any) => {
+    console.log('Model initializing:', model)
+  }
+
+  private async fetchAvailableModels(): Promise<Model[]> {
+    // Fetch models from API
+    return []
+  }
+}
+```
+
+## Extension Properties
+
+### Protected Properties
+
+```typescript
+protected settingFolderName = 'settings'
+protected settingFileName = 'settings.json'
+```
+
+### Public Properties
+
+```typescript
+name: string              // Extension name
+productName?: string      // Display name
+url: string               // Extension URL
+active: boolean           // Active status
+description: string       // Description
+version: string           // Version
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Type Safety" icon="shield-check">
+    Always specify the extension type for proper categorization.
+  </Card>
+  <Card title="Cleanup" icon="broom">
+    Remove all event listeners and clean up resources in `onUnload()`.
+  </Card>
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Wrap async operations in try-catch blocks.
+  </Card>
+  <Card title="Settings" icon="gear">
+    Use settings for user-configurable options instead of hardcoding.
+  </Card>
+</CardGroup>
+
+### Async Operations
+
+```typescript
+async onLoad(): Promise<void> {
+  try {
+    await this.initialize()
+    await this.registerModels(await this.fetchModels())
+  } catch (error) {
+    console.error('Failed to load extension:', error)
+    events.emit('Extension.LoadError', { name: this.name, error })
+  }
+}
+```
+
+### Resource Cleanup
+
+```typescript
+private handlers: Map<string, Function> = new Map()
+private resources: any[] = []
+
+onUnload(): void {
+  // Clean up event handlers
+  this.handlers.forEach((handler, event) => {
+    events.off(event, handler)
+  })
+  this.handlers.clear()
+
+  // Clean up resources
+  this.resources.forEach(resource => resource.dispose())
+  this.resources = []
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Type Definitions" icon="code" href="/core/types">
+    Explore all available types for extensions
+  </Card>
+  <Card title="Event System" icon="tower-broadcast" href="/core/events">
+    Learn about event-driven architecture
+  </Card>
+  <Card title="Model Interface" icon="cube" href="/core/types#modelinterface">
+    Implement model management
+  </Card>
+  <Card title="Inference Interface" icon="brain" href="/core/types#inferenceinterface">
+    Implement inference capabilities
+  </Card>
+</CardGroup>

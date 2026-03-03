@@ -1,0 +1,361 @@
+---
+title: Model Context Protocol (MCP)
+description: Extend Jan's capabilities by connecting AI models to external tools and data sources using the Model Context Protocol.
+icon: "plug-circle-bolt"
+---
+
+Jan supports the **Model Context Protocol (MCP)**, an open standard that allows AI models to interact with external tools and data sources in a standardized way.
+
+<Frame>
+  <img src="/images/mcp-diagram.png" alt="MCP Architecture" />
+</Frame>
+
+## What is MCP?
+
+The Model Context Protocol provides a common interface for AI models to connect with external tools without requiring custom integration work. It solves the "M × N" problem where every model (M) would otherwise need a unique connector for every tool (N).
+
+### How It Works
+
+```mermaid
+graph LR
+    A[Jan Desktop] --> B[MCP Client]
+    B --> C[MCP Server 1]
+    B --> D[MCP Server 2]
+    B --> E[MCP Server 3]
+    C --> F[File System]
+    D --> G[GitHub API]
+    E --> H[Database]
+```
+
+**Clients** (like Jan) connect to **MCP Servers** which provide:
+- **Prompts**: Pre-configured prompt templates
+- **Tools**: Functions the AI can call
+- **Resources**: Data sources the AI can access
+
+## Core Benefits
+
+<CardGroup cols={3}>
+  <Card title="Standardization" icon="brackets-curly">
+    One protocol connects any compliant model to any compliant tool
+  </Card>
+  <Card title="Extensibility" icon="puzzle-piece">
+    Grant AI models access to search, databases, APIs, and custom tools
+  </Card>
+  <Card title="Flexibility" icon="arrows-rotate">
+    Swap models or tools with minimal friction for modular workflows
+  </Card>
+</CardGroup>
+
+## Prerequisites
+
+Before setting up MCP servers, ensure you have:
+
+- **Node.js** - [Download from nodejs.org](https://nodejs.org/)
+- **Python** (optional, for Python-based servers) - [Download from python.org](https://www.python.org/)
+- **A tool-calling capable model** - Not all models support tool calling effectively
+
+<Warning>
+Not all AI models support tool calling or are MCP-compliant. Check the model's documentation before integrating it into MCP workflows. For local models, enable tool calling in [Model Capabilities settings](/features/model-parameters#model-capabilities-edit-button).
+</Warning>
+
+## Enable MCP in Jan
+
+<Steps>
+  <Step title="Enable Experimental Features">
+    Navigate to **Settings** > **General** > **Advanced** and enable experimental features
+  </Step>
+
+  <Step title="Enable MCP Servers">
+    Go to **Settings** > **MCP Servers** and toggle **Allow All MCP Tool Permission** ON
+  </Step>
+</Steps>
+
+## Setting Up an MCP Server
+
+Let's walk through setting up the Browser MCP as an example.
+
+### Browser MCP Configuration
+
+<Steps>
+  <Step title="Add New Server">
+    Click the **+** button in the MCP Servers section
+  </Step>
+
+  <Step title="Configure Server Details">
+    Enter the following configuration:
+
+    - **Server Name**: `browsermcp`
+    - **Command**: `npx`
+    - **Arguments**: `@browsermcp/mcp`
+    - **Environment Variables**: Leave empty
+
+    ```json
+    {
+      "command": "npx",
+      "args": ["@browsermcp/mcp"],
+      "env": {}
+    }
+    ```
+  </Step>
+
+  <Step title="Verify Activation">
+    Check that the server shows as "Connected" in the MCP Servers list
+  </Step>
+
+  <Step title="Install Browser Extension">
+    1. Open a Chrome-based browser (Chrome, Brave, Edge, Vivaldi)
+    2. Install the [Browser MCP Extension](https://chromewebstore.google.com/detail/browser-mcp-automate-your/bjfgambnhccakkhmkepdoekmckoijdlc)
+    3. Enable the extension to run in private/incognito windows
+    4. Connect the extension to your MCP server
+  </Step>
+
+  <Step title="Configure Model for Tool Use">
+    1. Select a model with good tool-calling capabilities (e.g., Claude 4 Sonnet, Claude 4 Opus)
+    2. Navigate to **Settings** > **Model Providers** > **[Your Provider]**
+    3. Enable tool calling for the model
+  </Step>
+</Steps>
+
+## MCP Server Examples
+
+Here are some popular MCP servers you can integrate:
+
+### File System Access
+
+```json
+{
+  "filesystem": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+  }
+}
+```
+
+### GitHub Integration
+
+```json
+{
+  "github": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-github"],
+    "env": {
+      "GITHUB_TOKEN": "your_github_token_here"
+    }
+  }
+}
+```
+
+### Database Access
+
+```json
+{
+  "postgres": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-postgres"],
+    "env": {
+      "DATABASE_URL": "postgresql://user:password@localhost:5432/dbname"
+    }
+  }
+}
+```
+
+### Slack Integration
+
+```json
+{
+  "slack": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-slack"],
+    "env": {
+      "SLACK_BOT_TOKEN": "xoxb-your-token",
+      "SLACK_TEAM_ID": "your-team-id"
+    }
+  }
+}
+```
+
+## MCP API Reference
+
+Jan implements the MCP interface for tool management:
+
+### Get Available Tools
+
+```typescript
+interface MCPTool {
+  name: string
+  description: string
+  inputSchema: Record<string, unknown>
+  server: string
+}
+
+// Get all available tools from connected servers
+const tools: MCPTool[] = await mcp.getTools()
+```
+
+### Call a Tool
+
+```typescript
+interface MCPToolCallResult {
+  error: string
+  content: Array<{
+    type?: string
+    text: string
+  }>
+}
+
+// Call a specific tool
+const result: MCPToolCallResult = await mcp.callTool(
+  'toolName',
+  { arg1: 'value1', arg2: 'value2' },
+  'serverName' // optional
+)
+```
+
+### Manage Servers
+
+```typescript
+// Get list of connected servers
+const servers: string[] = await mcp.getConnectedServers()
+
+// Refresh available tools
+await mcp.refreshTools()
+
+// Check service health
+const healthy: boolean = await mcp.isHealthy()
+```
+
+## Security Considerations
+
+<Warning>
+Granting AI models access to external tools has significant security implications. Always follow these best practices:
+</Warning>
+
+### Permission Management
+
+- Review each MCP server's capabilities before enabling
+- Enable permissions individually for each tool
+- Regularly audit active MCP servers
+- Disable unused servers to minimize attack surface
+
+### Data Privacy
+
+- Be cautious with servers that access sensitive data
+- Review the source code of third-party MCP servers
+- Use local-only servers when possible
+- Avoid passing credentials or secrets through prompts
+
+### Prompt Injection Risks
+
+MCP tools can be vulnerable to prompt injection attacks where malicious input tricks the model into misusing tools. Mitigation strategies:
+
+1. Use models with strong instruction-following capabilities
+2. Implement rate limiting for tool calls
+3. Add confirmation steps for destructive actions
+4. Monitor tool usage logs
+
+## Performance Considerations
+
+### Context Window Usage
+
+Active MCP connections consume a portion of the model's context window:
+
+- Each tool's schema is included in the prompt
+- More tools = less space for conversation
+- Balance tool availability with context needs
+
+### Resource Management
+
+- Limit the number of simultaneous MCP servers
+- Close connections to unused servers
+- Monitor system resource usage
+- Use streaming for long-running tool operations
+
+## Troubleshooting
+
+### Server Won't Connect
+
+<AccordionGroup>
+  <Accordion title="Check Prerequisites">
+    - Verify Node.js is installed: `node --version`
+    - Verify Python is installed (if needed): `python --version`
+    - Ensure all dependencies are installed
+  </Accordion>
+
+  <Accordion title="Verify Configuration">
+    - Double-check the command and arguments
+    - Ensure environment variables are set correctly
+    - Check for typos in the server name
+  </Accordion>
+
+  <Accordion title="Review Logs">
+    - Enable verbose logging in Jan's settings
+    - Check the MCP server logs for errors
+    - Restart Jan and try reconnecting
+  </Accordion>
+</AccordionGroup>
+
+### Model Won't Use Tools
+
+- **Verify tool calling is enabled** in model settings
+- **Check model compatibility** - many open-source models don't support tool calling well
+- **Test with a known-good model** like Claude 4 Sonnet or GPT-4
+- **Review the prompt** - be explicit about when to use tools
+
+### Tool Execution Fails
+
+- Verify the tool has necessary permissions
+- Check that environment variables are set correctly
+- Review tool arguments for correct format
+- Ensure external services (APIs, databases) are accessible
+
+## Best Practices
+
+### Model Selection
+
+Choose models with strong tool-calling capabilities:
+
+**Recommended for MCP:**
+- Claude 4 Opus / Sonnet (excellent tool calling)
+- GPT-4 / GPT-4 Turbo (reliable tool use)
+- Gemini 2.0 Pro (good multimodal + tools)
+
+**Caution with:**
+- Smaller open-source models (variable tool calling quality)
+- Models without explicit tool-calling training
+- Models that don't support vision (for screenshot-based tools)
+
+### Workflow Design
+
+1. **Start simple** - Begin with one or two tools
+2. **Test thoroughly** - Verify each tool works independently
+3. **Iterate gradually** - Add more tools as needed
+4. **Document usage** - Keep notes on what works well
+
+### Maintenance
+
+- Regularly update MCP servers to latest versions
+- Remove unused server configurations
+- Review and rotate API keys/tokens
+- Monitor tool usage for anomalies
+
+## Future Potential
+
+MCP integration enables sophisticated workflows:
+
+- **Cross-reference information** between local documents and remote APIs
+- **Automate complex tasks** by chaining multiple tools
+- **Build custom assistants** with domain-specific tool access
+- **Create reproducible workflows** with tool templates
+
+As the MCP ecosystem grows, Jan will continue expanding integration capabilities.
+
+## Resources
+
+- [MCP Specification](https://modelcontextprotocol.io/)
+- [Official MCP Servers](https://github.com/modelcontextprotocol/servers)
+- [Jan Discord Community](https://discord.gg/FTk2MvZwJH)
+- [Browse MCP Servers](https://github.com/modelcontextprotocol)
+
+<Card title="Need Help?" icon="question" href="https://discord.gg/FTk2MvZwJH">
+  Join our Discord community for support with MCP server configuration and troubleshooting.
+</Card>

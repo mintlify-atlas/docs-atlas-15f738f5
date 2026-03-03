@@ -1,0 +1,259 @@
+---
+title: FAQ
+description: Frequently asked questions about Jan - your open-source ChatGPT alternative.
+---
+
+# Frequently Asked Questions
+
+Find answers to common questions about Jan.
+
+## General
+
+<AccordionGroup>
+  <Accordion title="What is Jan?">
+    Jan is an open-source ChatGPT alternative that brings the best of open-source AI in an easy-to-use product. Download and run large language models (LLMs) with full control and privacy. Everything runs locally on your device when you want it to.
+  </Accordion>
+
+  <Accordion title="Is Jan really free?">
+    Yes, Jan is completely free and open-source under the Apache 2.0 license. There are no subscription fees, no hidden costs, and no usage limits when running models locally.
+  </Accordion>
+
+  <Accordion title="How is Jan different from ChatGPT?">
+    Jan runs entirely on your device, giving you complete privacy and control. You can use local AI models (like Llama, Gemma, Qwen) or connect to cloud services (OpenAI, Anthropic, Groq). No data leaves your device unless you choose to use cloud integrations.
+  </Accordion>
+
+  <Accordion title="Does Jan require an internet connection?">
+    No, Jan works completely offline when using local models. You only need internet to:
+    - Download models initially
+    - Use cloud integrations (OpenAI, Anthropic, etc.)
+    - Download updates
+  </Accordion>
+
+  <Accordion title="Where is my data stored?">
+    All data is stored locally on your device:
+    - **macOS**: `~/Library/Application Support/Jan`
+    - **Windows**: `C:\Users\%USERNAME%\AppData\Roaming\Jan`
+    - **Linux**: `~/.config/Jan`
+  </Accordion>
+</AccordionGroup>
+
+## Installation & Setup
+
+<AccordionGroup>
+  <Accordion title="What are the system requirements?">
+    **Minimum requirements:**
+    - **macOS**: 13.6+ (Ventura)
+    - **Windows**: 10 or later
+    - **Linux**: Most distributions supported
+    
+    **RAM requirements:**
+    - 8GB RAM: Run 3B parameter models
+    - 16GB RAM: Run 7B parameter models
+    - 32GB RAM: Run 13B+ parameter models
+    
+    See [System Requirements](/help/system-requirements) for full details.
+  </Accordion>
+
+  <Accordion title="How do I install Jan?">
+    Download the installer for your platform:
+    - **Windows**: [jan.exe](https://app.jan.ai/download/latest/win-x64)
+    - **macOS**: [jan.dmg](https://app.jan.ai/download/latest/mac-universal)
+    - **Linux**: [jan.deb](https://app.jan.ai/download/latest/linux-amd64-deb) or [jan.AppImage](https://app.jan.ai/download/latest/linux-amd64-appimage)
+    
+    Also available on [Microsoft Store](https://apps.microsoft.com/detail/xpdcnfn5cpzlqb) and [Flathub](https://flathub.org/apps/ai.jan.Jan).
+  </Accordion>
+
+  <Accordion title="Do I need a GPU to run Jan?">
+    No, Jan works on CPU-only systems. However, a GPU significantly improves performance:
+    - **NVIDIA GPUs**: Supported on Windows and Linux (CUDA 11.7+)
+    - **AMD GPUs**: Supported on Windows
+    - **Intel Arc**: Supported on Windows
+    - **Apple Silicon**: Uses Metal acceleration on Mac
+  </Accordion>
+
+  <Accordion title="Can I run Jan on a low-spec computer?">
+    Yes, choose smaller models that fit your RAM:
+    - 8GB RAM: Use 3B models (3-4GB)
+    - 16GB RAM: Use 7B models (6-8GB)
+    - Keep model size under 80% of available RAM for best performance
+  </Accordion>
+</AccordionGroup>
+
+## Models
+
+<AccordionGroup>
+  <Accordion title="What models can I use with Jan?">
+    **Local models from HuggingFace:**
+    - Llama (Meta)
+    - Gemma (Google)
+    - Qwen (Alibaba)
+    - Mistral
+    - And many more open-source models
+    
+    **Cloud integrations:**
+    - OpenAI (GPT-4, GPT-3.5)
+    - Anthropic (Claude)
+    - Groq
+    - Mistral API
+  </Accordion>
+
+  <Accordion title="How do I download models?">
+    1. Open Jan
+    2. Go to the **Hub** section
+    3. Browse available models
+    4. Click **Download** on your chosen model
+    5. Wait for download to complete
+    6. Start chatting!
+  </Accordion>
+
+  <Accordion title="How much disk space do models need?">
+    Model sizes vary:
+    - **3B models**: 2-4GB
+    - **7B models**: 4-8GB
+    - **13B models**: 8-16GB
+    - **70B+ models**: 40GB+
+    
+    Check the model card before downloading.
+  </Accordion>
+
+  <Accordion title="Can I use multiple models?">
+    Yes, download as many models as you have disk space for. Switch between models at any time in the chat interface.
+  </Accordion>
+
+  <Accordion title="Can I import custom models?">
+    Yes, Jan supports importing GGUF format models from HuggingFace or other sources. Place them in your models directory and they'll appear in Jan.
+  </Accordion>
+</AccordionGroup>
+
+## Usage
+
+<AccordionGroup>
+  <Accordion title="How do I create custom assistants?">
+    1. Go to **Thread** section
+    2. Click **New Thread**
+    3. Configure assistant settings:
+       - System prompt
+       - Model selection
+       - Parameters (temperature, max tokens, etc.)
+    4. Save and start chatting
+  </Accordion>
+
+  <Accordion title="What is the OpenAI-compatible API?">
+    Jan runs a local API server at `localhost:1337` that's compatible with OpenAI's API format. This lets you use Jan with:
+    - Code editors (Continue, Cursor)
+    - Development tools
+    - Custom applications
+    
+    No internet required - everything runs locally.
+  </Accordion>
+
+  <Accordion title="Can I use Jan for coding?">
+    Yes! Jan works great for coding tasks:
+    - Use code-specialized models (CodeLlama, Qwen Coder)
+    - Integrate with VS Code via the API
+    - Get code explanations, debugging help, and more
+  </Accordion>
+
+  <Accordion title="How do I adjust model performance?">
+    In the right sidebar during chat:
+    - **Temperature**: Controls randomness (0 = focused, 1 = creative)
+    - **Max Tokens**: Maximum response length
+    - **Top P**: Nucleus sampling parameter
+    - **GPU Layers (ngl)**: How many layers run on GPU
+    
+    Adjust based on your needs and hardware.
+  </Accordion>
+</AccordionGroup>
+
+## Privacy & Security
+
+<AccordionGroup>
+  <Accordion title="Is my data private?">
+    Yes, when using local models:
+    - All processing happens on your device
+    - No data is sent to external servers
+    - Chat history stays on your device
+    - Models run completely offline
+    
+    Cloud integrations (OpenAI, etc.) follow their respective privacy policies.
+  </Accordion>
+
+  <Accordion title="Can I use Jan in an enterprise environment?">
+    Yes, Jan is suitable for enterprise use:
+    - No external dependencies for local models
+    - Complete data privacy
+    - OpenAI-compatible API for integration
+    - Open-source and auditable
+  </Accordion>
+
+  <Accordion title="Does Jan collect telemetry?">
+    Jan includes optional telemetry that can be disabled in Settings. No personal data or chat content is collected. Only anonymous usage statistics help improve the product.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Jan won't start or crashes on launch">
+    1. Check [system requirements](/help/system-requirements)
+    2. Update to the latest version
+    3. Try a [clean installation](/help/troubleshooting#broken-build)
+    4. Check error logs in System Monitor
+  </Accordion>
+
+  <Accordion title="Model downloads fail or are very slow">
+    - Check your internet connection
+    - Verify sufficient disk space
+    - Try downloading from a different mirror
+    - Resume interrupted downloads from the Hub
+  </Accordion>
+
+  <Accordion title="GPU is not being used">
+    See the [GPU troubleshooting guide](/help/troubleshooting#nvidia-gpu-not-working) for:
+    - Driver installation
+    - CUDA toolkit setup
+    - GPU acceleration settings
+    - Verified configurations
+  </Accordion>
+
+  <Accordion title="Where can I get help?">
+    - **Documentation**: [jan.ai/docs](https://jan.ai/docs)
+    - **Discord**: [discord.gg/FTk2MvZwJH](https://discord.gg/FTk2MvZwJH) (#🆘|jan-help)
+    - **GitHub Issues**: [github.com/janhq/jan/issues](https://github.com/janhq/jan/issues)
+    - **Email**: hello@jan.ai
+  </Accordion>
+</AccordionGroup>
+
+## Development
+
+<AccordionGroup>
+  <Accordion title="Can I build Jan from source?">
+    Yes! Prerequisites:
+    - Node.js ≥ 20.0.0
+    - Yarn ≥ 1.22.0
+    - Make ≥ 3.81
+    - Rust
+    
+    ```bash
+    git clone https://github.com/janhq/jan
+    cd jan
+    make dev
+    ```
+  </Accordion>
+
+  <Accordion title="How can I contribute?">
+    Contributions are welcome:
+    - Report bugs on [GitHub Issues](https://github.com/janhq/jan/issues)
+    - Submit pull requests
+    - Join discussions on [Discord](https://discord.gg/FTk2MvZwJH)
+    - See [CONTRIBUTING.md](https://github.com/janhq/jan/blob/main/CONTRIBUTING.md)
+  </Accordion>
+
+  <Accordion title="Does Jan support plugins or extensions?">
+    Yes, Jan has an extension system. Check the documentation for details on creating custom extensions.
+  </Accordion>
+</AccordionGroup>
+
+## Still Have Questions?
+
+Visit our [Community](/help/community) page for support channels, or check the [Troubleshooting](/help/troubleshooting) guide for technical issues.
