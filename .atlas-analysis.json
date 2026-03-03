@@ -1,0 +1,147 @@
+{
+  "projectType": "saas",
+  "projectName": "Jan",
+  "projectDescription": "Open-source ChatGPT alternative that runs 100% offline on your computer",
+  "theme": "almond",
+  "primaryColor": "#3B82F6",
+  "lightColor": "#60A5FA",
+  "darkColor": "#2563EB",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Desktop App",
+            "pages": [
+              "desktop/overview",
+              "desktop/chat-interface",
+              "desktop/assistants",
+              "desktop/models",
+              "desktop/settings",
+              "desktop/data-folder"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/local-models",
+              "features/cloud-integration",
+              "features/api-server",
+              "features/mcp-integration",
+              "features/model-parameters"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/openai-compatible",
+              "integrations/remote-models",
+              "integrations/mcp-servers"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developers",
+        "groups": [
+          {
+            "group": "CLI",
+            "pages": [
+              "cli/overview",
+              "cli/commands",
+              "cli/serve",
+              "cli/launch"
+            ]
+          },
+          {
+            "group": "Extensions",
+            "pages": [
+              "extensions/overview",
+              "extensions/getting-started",
+              "extensions/core-api",
+              "extensions/building-extensions"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/overview",
+              "api/chat-completions",
+              "api/models",
+              "api/embeddings"
+            ]
+          },
+          {
+            "group": "Core Library",
+            "pages": [
+              "core/overview",
+              "core/types",
+              "core/events",
+              "core/extensions"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Help",
+        "groups": [
+          {
+            "group": "Support",
+            "pages": [
+              "help/troubleshooting",
+              "help/faq",
+              "help/system-requirements",
+              "help/community"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/build-from-source",
+              "resources/contributing",
+              "resources/changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Run LLMs locally with full privacy",
+    "OpenAI-compatible API server",
+    "Custom AI assistants",
+    "Model Context Protocol (MCP) integration",
+    "Cloud model integration (GPT, Claude, Mistral)",
+    "Extension system for customization",
+    "Cross-platform desktop app (Windows, macOS, Linux)",
+    "Mobile support (iOS, Android)",
+    "Command-line interface for headless usage"
+  ],
+  "publicApiSurface": [
+    "LocalOAIEngine - Local inference engine",
+    "RemoteOAIEngine - Cloud provider integration",
+    "AssistantExtension - Custom assistant creation",
+    "ConversationalExtension - Chat management",
+    "DownloadExtension - Model downloading",
+    "LlamaCppExtension - llama.cpp integration",
+    "MlxExtension - Apple MLX integration",
+    "RagExtension - Retrieval augmented generation",
+    "VectorDbExtension - Vector database support",
+    "jan serve - CLI command to serve models",
+    "jan launch - CLI command to launch agents with models",
+    "jan models - CLI model management",
+    "jan threads - CLI thread management",
+    "/v1/chat/completions - OpenAI-compatible chat endpoint",
+    "/v1/models - List available models",
+    "/v1/embeddings - Generate embeddings"
+  ]
+}
